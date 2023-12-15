@@ -42,6 +42,7 @@ dependencies {
   implementation ("mysql:mysql-connector-java:8.0.28")
   implementation ("com.google.protobuf:protobuf-java:3.19.6")
   implementation("io.vertx:vertx-jdbc-client:4.5.0")
+  implementation ("com.fasterxml.jackson.core:jackson-databind:2.13.4.1")
 
 
 

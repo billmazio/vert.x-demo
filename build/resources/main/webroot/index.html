@@ -6,33 +6,65 @@
   <link rel="stylesheet" href="../static/css/style.css">
   <script src="../static/js/index.js"></script>
   <title>Login</title>
-
-
+  <style>
+    /* Initially hide the register form */
+    #registerForm {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 <div class="container">
   <h2>Login</h2>
-
-  <!-- Include the form directly -->
-  <form id="loginForm" action="/api/login" method="POST">
+  <!-- Include the login form directly -->
+  <form id="loginForm" action="/login" method="POST">
     <label for="username">Username:</label>
     <input type="text" id="username" placeholder="Enter your username">
 
     <label for="password">Password:</label>
     <input type="password" id="password" placeholder="Enter your password">
 
-    <button type="submit" onclick="performLogin()">  Login</button>
+    <button type="submit" onclick="performLogin()">Login</button>
+
+    <!-- Placeholder for the response -->
+    <div id="response"></div>
   </form>
 
-  <p id="response"></p>
+  <!-- Link to toggle between login and register forms -->
+  <p id="registerLink">Don't have an account? <a href="#" onclick="toggleForms()">Register</a></p>
 
+  <!-- Include the register form directly -->
+  <form id="registerForm" action="/api/register" method="POST">
+    <label for="username">Username:</label>
+    <input type="text" id="username1" placeholder="Enter your username">
 
+    <label for="password">Password:</label>
+    <input type="password" id="password1" placeholder="Enter your password">
+
+    <button type="submit" onclick="performRegister()">Register</button>
+  </form>
+
+  <p id="registerResponse"></p>
 </div>
 
+<script>
+  function toggleForms() {
+    // Toggle the visibility of the login and register forms
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const registerLink = document.getElementById('registerLink');
 
-
-
-
+    if (loginForm.style.display === 'none') {
+      loginForm.style.display = 'block';
+      registerForm.style.display = 'none';
+      registerLink.innerHTML = "Don't have an account? <a href='#' onclick='toggleForms()'>Register</a>";
+    } else {
+      loginForm.style.display = 'none';
+      registerForm.style.display = 'block';
+      registerLink.innerHTML = 'Already have an account? <a href="#" onclick="toggleForms()">Login</a>';
+    }
+  }
+</script>
 
 </body>
 </html>

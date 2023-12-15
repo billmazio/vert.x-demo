@@ -1,18 +1,23 @@
 package com.vas.maz.vertx_starter.user;
 
+import io.vertx.core.json.JsonObject;
+
 public class User {
   private Long id; // Assuming Long for flexibility, adjust as needed
   private String username;
   private String password;
 
+
   public User() {
   }
 
   public User(Long id, String username, String password) {
-    this.id = id;
     this.username = username;
     this.password = password;
+    this.id = id;
   }
+
+
 
   public Long getId() {
     return id;

@@ -1,5 +1,6 @@
 package com.vas.maz.vertx_starter.user;
 
+import com.vas.maz.vertx_starter.user.service.UserService;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Router;
@@ -31,6 +32,9 @@ public class Server {
 
     UserRouter userRouter = new UserRouter(vertx, userService);
     router.mountSubRouter("/", userRouter.getRouter());
+
+    router.route("/users").handler(StaticHandler.create().setCachingEnabled(false).setWebRoot("webroot"));
+
 
     StaticHandler staticHandler = StaticHandler.create().setCachingEnabled(false).setWebRoot("webroot");
     router.route("/").handler(staticHandler);

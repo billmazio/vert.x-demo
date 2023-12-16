@@ -1,5 +1,4 @@
 package com.vas.maz.vertx_starter.user;
-
 import com.vas.maz.vertx_starter.user.service.UserService;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -7,8 +6,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.StaticHandler;
-
-
 public class Server {
 
   private final Vertx vertx;
@@ -33,10 +30,10 @@ public class Server {
     UserRouter userRouter = new UserRouter(vertx, userService);
     router.mountSubRouter("/", userRouter.getRouter());
 
-    router.route("/users").handler(StaticHandler.create().setCachingEnabled(false).setWebRoot("webroot"));
 
 
-    StaticHandler staticHandler = StaticHandler.create().setCachingEnabled(false).setWebRoot("webroot");
+
+    StaticHandler staticHandler = StaticHandler.create().setCachingEnabled(false).setWebRoot("template");
     router.route("/").handler(staticHandler);
 
     vertx.createHttpServer()
@@ -46,3 +43,4 @@ public class Server {
     System.out.println("Server started on port 8080");
   }
 }
+

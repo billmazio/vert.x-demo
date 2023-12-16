@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../static/css/users.css">
+  <title>User List</title>
+</head>
+<body>
+<h1>User List</h1>
+<table border="1">
+  <tr>
+    <th>ID</th>
+    <th>Username</th>
+    <th>Password</th>
+    <th>Actions</th>
+  </tr>
+  <tr th:each="user : ${users}">
+    <td th:text="${user.id}"></td>
+    <td th:text="${user.username}"></td>
+    <td th:text="${user.password}"></td>
+    <td>
+<!--   <a th:href="@{'/updateUser/' + ${user.id}}" class="btn">Update</a>-->
+      <a th:href="@{/updateUser/{userId}(id = ${user.id})}">Update</a>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

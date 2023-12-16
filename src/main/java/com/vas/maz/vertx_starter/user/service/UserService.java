@@ -9,15 +9,25 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.thymeleaf.context.Context;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 
 public class UserService {
 
   private static final Logger logger = LoggerFactory.getLogger(UserService.class);
   private DatabaseService databaseService;
+
+  private final ThymeleafTemplateEngine templateEngine;
+
+//  private static Vertx vertx;
+//  private static final TemplateEngine templateEngine = ThymeleafTemplateEngine.create(vertx);
 
 
   public UserService(Vertx vertx) {
@@ -28,6 +38,8 @@ public class UserService {
       .put("user", "root")
       .put("password", "ww321278?")
     ));
+
+    this.templateEngine = ThymeleafTemplateEngine.create(vertx);
   }
 
   public void login(RoutingContext routingContext) {
@@ -53,7 +65,7 @@ public class UserService {
               if (authResult.succeeded() && authResult.result()) {
                 // Authentication succeeded
                 routingContext.response()
-                  .putHeader("Content-Type", "application/json")
+                  .putHeader("Content-Type", "text/html")
                   .putHeader("Location", "/users")
                   .setStatusCode(303) // See Other
                   .end();
@@ -129,6 +141,9 @@ public class UserService {
                 // Respond with a success status code
                 routingContext.response().setStatusCode(201).end("User registered successfully");
                 logger.info("Registration successful");
+
+                // Redirect to the login page after successful registration
+                //  routingContext.response().putHeader("Location", "/").setStatusCode(303).end();
               } else {
                 logger.error("Failed to save user", saveUserResult.cause());
                 // Respond with an error status code
@@ -159,8 +174,34 @@ public class UserService {
       databaseService.getUsers(ar -> {
         if (ar.succeeded()) {
           List<User> users = ar.result();
-          // Respond with the list of users as JSON
-          routingContext.response().putHeader("Content-Type", "application/json").end(Json.encode(users));
+
+          // Create a Thymeleaf context
+          Context thymeleafContext = new Context();
+          thymeleafContext.setVariable("users", users);
+
+          // Convert Thymeleaf context to Map
+          Map<String, Object> thymeleafContextMap = new HashMap<>();
+          // Convert Thymeleaf context to Map
+          thymeleafContextMap = new HashMap<>();
+          thymeleafContextMap.put("users", thymeleafContext.getVariable("users"));
+
+          // Log the template path for debugging
+          String templatePath = "template/users.html";
+
+          // Render the Thymeleaf template
+          templateEngine.render(thymeleafContextMap, templatePath, res -> {
+            if (res.succeeded()) {
+              String result = String.valueOf(res.result());
+              if (result != null) {
+                routingContext.response().putHeader("Content-Type", "text/html").end(result);
+              } else {
+                routingContext.fail(500);
+              }
+            } else {
+              routingContext.fail(500, res.cause());
+            }
+          });
+
           logger.info("Retrieved users successfully");
         } else {
           logger.error("Failed to retrieve users", ar.cause());
@@ -176,4 +217,33 @@ public class UserService {
   }
 
 
+  // UserService.java
+  public void updateUser(RoutingContext routingContext) {
+    String userId = routingContext.request().getParam("userId");
+    JsonObject updatedUserData = routingContext.getBodyAsJson();
+
+    try {
+      databaseService.updateUser(userId, updatedUserData, ar -> {
+        if (ar.succeeded()) {
+          routingContext.response().setStatusCode(200).end("User updated successfully");
+        } else {
+          routingContext.response().setStatusCode(500).end("Failed to update user");
+        }
+      });
+    } catch (Exception e) {
+      e.printStackTrace();
+      routingContext.response().setStatusCode(500).end("Internal Server Error");
+    }
+  }
+
 }
+
+
+
+
+
+
+
+
+
+

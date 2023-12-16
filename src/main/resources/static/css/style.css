@@ -54,14 +54,14 @@ button:hover {
 }
 /* styles.css */
 
-/*input {*/
-/*  width: calc(100% - 22px); !* Adjust the width of the input, considering the padding and border *!*/
-/*  padding: 10px;*/
-/*  margin-bottom: 10px;*/
-/*  border: 1px solid red;*/
-/*  transition: border-color 0.3s ease;*/
-/*}*/
+input {
+  width: calc(100% - 22px); /* Adjust the width of the input, considering the padding and border */
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid red;
+  transition: border-color 0.3s ease;
+}
 
-/*input:focus {*/
-/*  border-color: black;*/
-/*}*/
+input:focus {
+  border-color: black;
+}

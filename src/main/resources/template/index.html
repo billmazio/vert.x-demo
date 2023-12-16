@@ -24,7 +24,8 @@
     <label for="password">Password:</label>
     <input type="password" id="password" placeholder="Enter your password">
 
-    <button type="submit" onclick="performLogin()">Login</button>
+    <button type="button" onclick="performLogin()">Login</button>
+
 
     <!-- Placeholder for the response -->
     <div id="response"></div>
@@ -34,14 +35,14 @@
   <p id="registerLink">Don't have an account? <a href="#" onclick="toggleForms()">Register</a></p>
 
   <!-- Include the register form directly -->
-  <form id="registerForm" action="/api/register" method="POST">
+  <form id="registerForm" action="/register" method="POST">
     <label for="username">Username:</label>
     <input type="text" id="username1" placeholder="Enter your username">
 
     <label for="password">Password:</label>
     <input type="password" id="password1" placeholder="Enter your password">
 
-    <button type="submit" onclick="performRegister()">Register</button>
+    <button type="button" onclick="performRegister()">Register</button>
   </form>
 
   <p id="registerResponse"></p>
@@ -65,6 +66,5 @@
     }
   }
 </script>
-
 </body>
 </html>

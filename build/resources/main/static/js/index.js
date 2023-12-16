@@ -1,25 +1,20 @@
 function performRegister() {
-  // Get values from the registration form
   const username = document.getElementById('username1').value;
   const password = document.getElementById('password1').value;
 
-  // Check if username or password is empty
   if (username.trim() === '' || password.trim() === '') {
-    // Display an alert or handle the empty fields as needed
     alert('Please enter both username and password.');
-    return; // Stop the function if fields are empty
+    return;
   }
 
   console.log('Performing registration with username:', username);
 
-  // Create JSON payload
   const payload = {
     username: username,
     password: password
   };
 
-  // Make a POST request to /api/register
-  fetch('/api/register', {
+  fetch('/register', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -30,20 +25,24 @@ function performRegister() {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      return response.json();
+      return response.text();
     })
     .then(data => {
-      // Handle the response data
-      console.log('Registration response:', data);
-
-      // Redirect to the login page on successful registration
-      window.location.href = '/login';
+      console.log('Register response:', data);
+      // Handle non-JSON response
+      if (data.includes('User registered successfully')) {
+        window.location.href = '/';
+      } else {
+        // Handle other cases (e.g., display an error message)
+        alert(`Registration failed. ${data}`);
+      }
     })
     .catch(error => {
-      // Handle errors
       console.error('Error:', error);
     });
 }
+
+
 
 function performLogin() {
   // Get values from the input fields
@@ -76,10 +75,21 @@ function performLogin() {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      return response.json();
+      // Check if the response is JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return response.json();
+      } else {
+        // Handle non-JSON response (e.g., redirect or display an error)
+        console.log('Non-JSON response:', response);
+        // You can decide how to handle this based on your server behavior
+        // For now, let's assume a successful login and redirect
+        window.location.href = '/users';
+      }
     })
     .then(data => {
-      console.log(data);
+      // Handle the JSON response (if any)
+      console.log('Login response:', data);
       if (data.success) {
         // Check if the response contains a 'redirect' property
         if (data.redirect) {
@@ -91,9 +101,11 @@ function performLogin() {
         }
       } else {
         alert('Login failed. Please check your credentials.');
+
       }
     })
     .catch(error => {
+      // Handle errors
       console.error('Error:', error);
     });
 }

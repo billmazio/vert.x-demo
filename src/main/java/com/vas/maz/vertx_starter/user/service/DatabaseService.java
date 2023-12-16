@@ -23,9 +23,6 @@ public class DatabaseService {
     this.jdbcClient = jdbcClient;
   }
 
-  public DatabaseService() {
-
-  }
 
   public void saveUser(User user, Handler<AsyncResult<Void>> resultHandler) {
     // Check if a user with the same username already exists
@@ -48,7 +45,7 @@ public class DatabaseService {
               resultHandler.handle(Future.failedFuture(insertResult.cause()));
             } else {
               // User successfully inserted
-              resultHandler.handle(Future.succeededFuture());
+             resultHandler.handle(Future.succeededFuture());
             }
           });
         }
@@ -56,7 +53,33 @@ public class DatabaseService {
     });
   }
 
-  public void doesUsernameExist(String username, Handler<AsyncResult<Boolean>> resultHandler) {
+  public void updateUser(String id, JsonObject updatedUserData, Handler<AsyncResult<Void>> resultHandler) {
+    try {
+      long userId = Long.parseLong(id); // Convert String to long
+      String query = "UPDATE users SET username = ?, password = ? WHERE id = ?";
+      JsonArray params = new JsonArray().add(updatedUserData.getString("field1"))
+        .add(updatedUserData.getString("field2"))
+        .add(userId); // Use the parsed long userId
+
+      System.out.println("Executing SQL query: " + query);
+      System.out.println("Params: " + params.encode());
+
+      jdbcClient.updateWithParams(query, params, ar -> {
+        if (ar.succeeded()) {
+          resultHandler.handle(Future.succeededFuture());
+        } else {
+          resultHandler.handle(Future.failedFuture(ar.cause()));
+        }
+      });
+    } catch (NumberFormatException e) {
+      // Handle the case where the id cannot be parsed to a long
+      resultHandler.handle(Future.failedFuture("Invalid user ID format"));
+    }
+  }
+
+
+
+    public void doesUsernameExist(String username, Handler<AsyncResult<Boolean>> resultHandler) {
     jdbcClient.getConnection(res -> {
       if (res.succeeded()) {
         SQLConnection connection = res.result();
@@ -82,31 +105,40 @@ public class DatabaseService {
 
 
 
-public void getUsers(Handler<AsyncResult<List<User>>> resultHandler) {
-  jdbcClient.getConnection(conn -> {
-    if (conn.succeeded()) {
-      SQLConnection connection = conn.result();
-      try {
-        connection.query("SELECT * FROM users", query -> {
-          if (query.succeeded()) {
-            ResultSet resultSet = query.result();
-            List<User> users = new ArrayList<>();
-            for (JsonObject row : resultSet.getRows()) {
-              users.add(new User(row.getLong("id"), row.getString("username"), row.getString("password")));
+
+  public void getUsers(Handler<AsyncResult<List<User>>> resultHandler) {
+    jdbcClient.getConnection(conn -> {
+      if (conn.succeeded()) {
+        SQLConnection connection = conn.result();
+        try {
+          connection.query("SELECT * FROM users", query -> {
+            if (query.succeeded()) {
+              ResultSet resultSet = query.result();
+              List<User> users = new ArrayList<>();
+              for (JsonObject row : resultSet.getRows()) {
+                users.add(new User(row.getLong("id"), row.getString("username"), row.getString("password")));
+              }
+              resultHandler.handle(Future.succeededFuture(users));
+              // Add logging to check the retrieved user data
+              System.out.println("Retrieved users from the database: " + users);
+            } else {
+              resultHandler.handle(Future.failedFuture(query.cause()));
+              // Add logging for query failure
+              query.cause().printStackTrace();
             }
-            resultHandler.handle(Future.succeededFuture(users));
-          } else {
-            resultHandler.handle(Future.failedFuture(query.cause()));
-          }
-        });
-      } finally {
-        connection.close();
+          });
+        } finally {
+          connection.close();
+        }
+      } else {
+        resultHandler.handle(Future.failedFuture(conn.cause()));
+        // Add logging for connection failure
+        conn.cause().printStackTrace();
       }
-    } else {
-      resultHandler.handle(Future.failedFuture(conn.cause()));
-    }
-  });
-}
+    });
+  }
+
+
   // Other database operations...
 }
 

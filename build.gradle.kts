@@ -43,7 +43,14 @@ dependencies {
   implementation ("com.google.protobuf:protobuf-java:3.19.6")
   implementation("io.vertx:vertx-jdbc-client:4.5.0")
   implementation ("com.fasterxml.jackson.core:jackson-databind:2.13.4.1")
+//  implementation ("io.vertx:vertx-web-templ-freemarker:3.9.5")
+  implementation ("org.thymeleaf:thymeleaf:3.0.12.RELEASE")
+  implementation("io.vertx:vertx-web-templ-thymeleaf:4.5.0")
 
+
+
+//  implementation ("io.vertx:vertx-web:4.2.4")
+//  implementation ("io.vertx:vertx-thymeleaf:4.2.+")
 
 
 
@@ -52,6 +59,7 @@ dependencies {
   implementation("io.vertx:vertx-web:${vertxVersion}")
   implementation("io.vertx:vertx-auth-common:${vertxVersion}")
   implementation("io.vertx:vertx-auth-jwt:${vertxVersion}")
+//  implementation("io.vertx:vertx-web-templ-thymeleaf:3.2.1")
   testImplementation("io.vertx:vertx-junit5")
   testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
 }

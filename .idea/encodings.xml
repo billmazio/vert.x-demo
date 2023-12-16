@@ -3,6 +3,7 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/src/main/java/com/vas/maz/vertx_starter/user/service/DatabaseService.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/vas/maz/vertx_starter/user/service/UserService.java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/resources/webroot/index.html" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/vas/maz/vertx_starter/user/service/YourClass.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/template/index.html" charset="UTF-8" />
   </component>
 </project>

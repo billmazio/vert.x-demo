@@ -53,29 +53,6 @@ public class DatabaseService {
     });
   }
 
-  public void updateUser(String id, JsonObject updatedUserData, Handler<AsyncResult<Void>> resultHandler) {
-    try {
-      long userId = Long.parseLong(id); // Convert String to long
-      String query = "UPDATE users SET username = ?, password = ? WHERE id = ?";
-      JsonArray params = new JsonArray().add(updatedUserData.getString("field1"))
-        .add(updatedUserData.getString("field2"))
-        .add(userId); // Use the parsed long userId
-
-      System.out.println("Executing SQL query: " + query);
-      System.out.println("Params: " + params.encode());
-
-      jdbcClient.updateWithParams(query, params, ar -> {
-        if (ar.succeeded()) {
-          resultHandler.handle(Future.succeededFuture());
-        } else {
-          resultHandler.handle(Future.failedFuture(ar.cause()));
-        }
-      });
-    } catch (NumberFormatException e) {
-      // Handle the case where the id cannot be parsed to a long
-      resultHandler.handle(Future.failedFuture("Invalid user ID format"));
-    }
-  }
 
 
 
@@ -139,6 +116,50 @@ public class DatabaseService {
   }
 
 
-  // Other database operations...
-}
+  public void updateUser(User user, Handler<AsyncResult<Void>> resultHandler) {
+    // Check if the user or user id is null
+    if (user == null || user.getId() == null) {
+      resultHandler.handle(Future.failedFuture("Invalid user or user id"));
+      return;
+    }
+
+    // Check if the new username is already taken
+    String checkUserQuery = "SELECT id FROM users WHERE username = ? AND id <> ?";
+    JsonArray checkParams = new JsonArray().add(user.getUsername()).add(user.getId());
+
+    jdbcClient.querySingleWithParams(checkUserQuery, checkParams, checkUser -> {
+      if (checkUser.failed()) {
+        // Handle the query failure
+        resultHandler.handle(Future.failedFuture(checkUser.cause()));
+      } else {
+        if (checkUser.result() != null) {
+          // New username is already taken, handle accordingly
+          resultHandler.handle(Future.failedFuture("New username already exists"));
+        } else {
+          // Update the user information in the database
+          String updateUserQuery = "UPDATE users SET username = ?, password = ? WHERE id = ?";
+          JsonArray params = new JsonArray().add(user.getUsername()).add(user.getPassword()).add(user.getId());
+          jdbcClient.updateWithParams(updateUserQuery, params, updateResult -> {
+            if (updateResult.failed()) {
+              // Handle the update failure
+              resultHandler.handle(Future.failedFuture(updateResult.cause()));
+            } else {
+              // User successfully updated
+              resultHandler.handle(Future.succeededFuture());
+            }
+          });
+        }
+      }
+    });
+  }
+
+
+
+
+  }
+
+
+
+
+
 

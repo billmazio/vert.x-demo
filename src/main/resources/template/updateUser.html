@@ -12,29 +12,25 @@
   <h1>User Management System</h1>
   <hr>
   <h2>Update User</h2>
-  <!-- Plain HTML template -->
-<!--  <a href="#" onclick="updateUser(${user.id})">Update</a>-->
+  <form action="/updateUser"  method="post">
 
 
-    <!-- Add hidden form field to handle update -->
-    <label for="userId">User ID:</label>
-    <input type="text" id="userId" name="userId" th:value="${users}" readonly />
-
+    <input type="hidden" th:name="id" th:value="${user.id}" />
 
     <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required />
+    <input type="text" id="username" name="username" th:value="${user.username}" required />
 
     <label for="password">Password:</label>
-    <input type="text" id="password" name="password" required />
+    <input type="password" id="password" name="password" th:value="${user.password}" required />
 
-
-
-    <button type="submit" class="btn btn-info col-2">Update User</button>
+    <button type="submit">Update</button>
   </form>
 
-  <hr>
 
-  <a th:href="@{/userList}"> Back to User List</a>
+
+
+
+  <a th:href="@{/users}"> Back to User List</a>
 </div>
 </body>
 

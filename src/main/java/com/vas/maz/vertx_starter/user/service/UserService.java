@@ -216,29 +216,93 @@ public class UserService {
     }
   }
 
-
-  // UserService.java
   public void updateUser(RoutingContext routingContext) {
-    String userId = routingContext.request().getParam("userId");
-    JsonObject updatedUserData = routingContext.getBodyAsJson();
-
     try {
-      databaseService.updateUser(userId, updatedUserData, ar -> {
+      // Retrieve user information from the request, assuming you have appropriate form fields
+      String userIdString = routingContext.request().getParam("id");
+      String newUsername = routingContext.request().getParam("username");
+      String newPassword = routingContext.request().getParam("password");
+
+      Long userId = Long.parseLong(userIdString);
+      // Create a User object with the updated information
+      User updatedUser = new User(userId, newUsername, newPassword);
+
+      // Use the DatabaseService instance to update the user
+      databaseService.updateUser(updatedUser, ar -> {
         if (ar.succeeded()) {
-          routingContext.response().setStatusCode(200).end("User updated successfully");
+          // User successfully updated
+
+          // Redirect to the user list page or show a success message
+          if (!routingContext.response().ended()) {
+            routingContext.response().setStatusCode(303).putHeader("Location", "/users").end();
+          }
+
+          logger.info("Updated user successfully");
         } else {
-          routingContext.response().setStatusCode(500).end("Failed to update user");
+          // Failed to update user
+
+          // Redirect to an error page or show an error message
+          if (!routingContext.response().ended()) {
+            routingContext.fail(500);
+          }
+
+          logger.error("Failed to update user", ar.cause());
         }
       });
+
+      // Retrieve and render users after the update (similar to getUsers logic)
+      databaseService.getUsers(usersResult -> {
+        if (usersResult.succeeded()) {
+          List<User> users = usersResult.result();
+
+          // Add the updated user to the Thymeleaf context
+          Context thymeleafContext = new Context();
+          thymeleafContext.setVariable("user", updatedUser);
+         // thymeleafContext.setVariable("users", users);
+
+          // Convert Thymeleaf context to Map
+          Map<String, Object> thymeleafContextMap = new HashMap<>();
+          thymeleafContextMap.put("user", thymeleafContext.getVariable("user"));
+        //  thymeleafContextMap.put("users", thymeleafContext.getVariable("users"));
+
+          // Log the template path for debugging
+          String templatePath = "template/updateUser.html";
+
+          // Render the Thymeleaf template
+          templateEngine.render(thymeleafContextMap, templatePath, res -> {
+            if (res.succeeded()) {
+              String result = String.valueOf(res.result());
+              if (result != null && !routingContext.response().ended()) {
+                routingContext.response().putHeader("Content-Type", "text/html").end(result);
+              } else {
+                routingContext.fail(500);
+              }
+            } else {
+              routingContext.fail(500, res.cause());
+            }
+          });
+
+          logger.info("Retrieved users successfully after update");
+        } else {
+          logger.error("Failed to retrieve users after update", usersResult.cause());
+          // Respond with an error status code
+          routingContext.fail(500);
+        }
+      });
+    } catch (NumberFormatException e) {
+      // Handle the case where userId couldn't be parsed to Long
+      routingContext.fail(400, e);
+      logger.error("Invalid userId format", e);
     } catch (Exception e) {
-      e.printStackTrace();
-      routingContext.response().setStatusCode(500).end("Internal Server Error");
+      // Handle any unexpected exceptions
+      routingContext.fail(500, e);
+      logger.error("Error during updateUser", e);
     }
   }
 
+
+
 }
-
-
 
 
 

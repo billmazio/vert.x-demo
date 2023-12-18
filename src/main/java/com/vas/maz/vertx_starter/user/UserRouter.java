@@ -19,11 +19,12 @@ public class UserRouter {
     router.post("/login").handler(userService::login);
     router.get("/users").handler(userService::getUsers);
     // Update the route to use PUT
-    //router.put("/updateUser").handler(userService::updateUser);
-    router.put( "/updateUser/:userId").handler(userService::updateUser);
+    router.post("/updateUser").handler(userService::updateUser);
 
 
-  //  ThymeleafTemplateEngine.create(vertx, new TemplateEngineOptions().setPrefix("webroot/").setSuffix(".html"));
+    // router.post("/updateUser").handler(userService::updateUser);
+
+
 
 
     StaticHandler staticHandler = StaticHandler.create().setCachingEnabled(false).setWebRoot("static");

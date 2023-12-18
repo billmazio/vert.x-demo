@@ -1,9 +1,44 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <link rel="stylesheet" href="../static/css/users.css">-->
+<!--  <script src="../static/js/users.js"></script>-->
+<!--  <title>User List</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>User List</h1>-->
+<!--<table border="1">-->
+<!--  <tr>-->
+<!--    <th>ID</th>-->
+<!--    <th>Username</th>-->
+<!--    <th>Password</th>-->
+<!--    <th>Actions</th>-->
+<!--  </tr>-->
+<!--  <tr th:each="user : ${users}">-->
+<!--    <td th:text="${user.id}"></td>-->
+<!--    <td th:text="${user.username}"></td>-->
+<!--    <td th:text="${user.password}"></td>-->
+<!--    <td>-->
+<!--      &lt;!&ndash; Thymeleaf template &ndash;&gt;-->
+<!--      <a th:href="@{/updateUser/{id}(id=${user.id})}">Update</a>-->
+
+<!--      &lt;!&ndash;      <button type="button" onclick="updateUser('${user.id}', '${user.username}', '${user.password}')">Update</button>&ndash;&gt;-->
+<!--    </td>-->
+<!--</table>-->
+<!--</div>-->
+
+
+<!--</body>-->
+<!--</html>-->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../static/css/users.css">
+  <script src="../static/js/users.js"></script>
   <title>User List</title>
 </head>
 <body>
@@ -20,8 +55,12 @@
     <td th:text="${user.username}"></td>
     <td th:text="${user.password}"></td>
     <td>
-<!--   <a th:href="@{'/updateUser/' + ${user.id}}" class="btn">Update</a>-->
-      <a th:href="@{/updateUser/{userId}(id = ${user.id})}">Update</a>
+      <!-- Simple form for update -->
+      <form method="post" action="/updateUser">
+        <input type="hidden" name="id" th:value="${user.id}">
+
+        <button type="submit">Update</button>
+      </form>
     </td>
   </tr>
 </table>

@@ -22,6 +22,7 @@ public class Server {
     router.route().handler(CorsHandler.create("*")
       .allowedMethod(HttpMethod.GET)
       .allowedMethod(HttpMethod.POST)
+      .allowedMethod(HttpMethod.PUT)
       .allowedMethod(HttpMethod.OPTIONS)
       .allowedHeader("Content-Type"));
 

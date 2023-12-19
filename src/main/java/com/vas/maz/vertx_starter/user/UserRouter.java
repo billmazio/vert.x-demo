@@ -18,12 +18,8 @@ public class UserRouter {
     router.post("/register").handler(userService::registerUser);
     router.post("/login").handler(userService::login);
     router.get("/users").handler(userService::getUsers);
+    router.post("/updateUser").handler(userService::updateUser);
 
-    // Update the route to use PUT
-    router.route("/updateUser").handler(userService::updateUser);
-
-
-    // router.post("/updateUser").handler(userService::updateUser);
 
 
 

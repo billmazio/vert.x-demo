@@ -46,6 +46,8 @@ dependencies {
 //  implementation ("io.vertx:vertx-web-templ-freemarker:3.9.5")
   implementation ("org.thymeleaf:thymeleaf:3.0.12.RELEASE")
   implementation("io.vertx:vertx-web-templ-thymeleaf:4.5.0")
+  implementation ("io.vertx:vertx-core:3.9.8") // Use the version that matches your Vert.x version
+
 
 
 

@@ -222,9 +222,11 @@ public class UserService {
       String idParam = routingContext.request().getParam("id");
       Long id = null;
 
-      if (idParam != null) {
+      if (idParam != null && !idParam.isEmpty()) {
         try {
-          id = Long.valueOf(idParam);
+//          id = Long.valueOf(idParam);
+            id = Long.parseLong(idParam);
+
         } catch (NumberFormatException e) {
           // Handle the exception, e.g., log it or return an error response
           routingContext.fail(400); // Bad Request
@@ -244,7 +246,7 @@ public class UserService {
 
           // Redirect to the user list page or show a success message
           if (!routingContext.response().ended()) {
-            routingContext.response().setStatusCode(303).putHeader("Location", "/updateUser").end();
+            routingContext.response().setStatusCode(303).putHeader("Location", "/users").end();
 
           }
 
@@ -254,7 +256,7 @@ public class UserService {
 
           // Redirect to an error page or show an error message
           if (!routingContext.response().ended()) {
-            routingContext.fail(500);
+//            routingContext.fail(500);
           }
 
           logger.error("Failed to update user", ar.cause());
@@ -315,8 +317,10 @@ public class UserService {
 
 
 
-}
 
+
+
+}
 
 
 

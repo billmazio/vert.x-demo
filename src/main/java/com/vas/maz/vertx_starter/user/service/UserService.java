@@ -26,8 +26,7 @@ public class UserService {
 
   private final ThymeleafTemplateEngine templateEngine;
 
-//  private static Vertx vertx;
-//  private static final TemplateEngine templateEngine = ThymeleafTemplateEngine.create(vertx);
+
 
 
   public UserService(Vertx vertx) {
@@ -66,7 +65,7 @@ public class UserService {
                 // Authentication succeeded
                 routingContext.response()
                   .putHeader("Content-Type", "text/html")
-                  .putHeader("Location", "/users")
+                  .putHeader("Location", "/")
                   .setStatusCode(303) // See Other
                   .end();
                 logger.info("Login successful");
@@ -186,7 +185,7 @@ public class UserService {
           thymeleafContextMap.put("users", thymeleafContext.getVariable("users"));
 
           // Log the template path for debugging
-          String templatePath = "template/users.html";
+          String templatePath = "templates/users.html";
 
           // Render the Thymeleaf template
           templateEngine.render(thymeleafContextMap, templatePath, res -> {
@@ -216,6 +215,7 @@ public class UserService {
     }
   }
 
+
   public void updateUser(RoutingContext routingContext) {
     try {
       // Retrieve user information from the request, assuming you have appropriate form fields
@@ -224,9 +224,7 @@ public class UserService {
 
       if (idParam != null && !idParam.isEmpty()) {
         try {
-//          id = Long.valueOf(idParam);
-            id = Long.parseLong(idParam);
-
+          id = Long.parseLong(idParam);
         } catch (NumberFormatException e) {
           // Handle the exception, e.g., log it or return an error response
           routingContext.fail(400); // Bad Request
@@ -244,56 +242,53 @@ public class UserService {
         if (ar.succeeded()) {
           // User successfully updated
 
-          // Redirect to the user list page or show a success message
-          if (!routingContext.response().ended()) {
-            routingContext.response().setStatusCode(303).putHeader("Location", "/users").end();
+          // Set a flag indicating the update success in the routing context
+          routingContext.put("updateSuccess", true);
 
-          }
-
-          logger.info("Updated user successfully");
+          // Redirect to the user list page
+     //     routingContext.response().setStatusCode(303).putHeader("Location", "/users").end();
         } else {
           // Failed to update user
 
-          // Redirect to an error page or show an error message
-          if (!routingContext.response().ended()) {
-//            routingContext.fail(500);
-          }
-
+          // Log the error
           logger.error("Failed to update user", ar.cause());
+
+          // Redirect to an error page or show an error message
+          routingContext.response().setStatusCode(500).end("Failed to update user");
         }
       });
 
       // Retrieve and render users after the update (similar to getUsers logic)
       databaseService.getUsers(usersResult -> {
         if (usersResult.succeeded()) {
-          List<User> users = usersResult.result();
+        //  List<User> users = usersResult.result();
 
           // Add the updated user to the Thymeleaf context
           Context thymeleafContext = new Context();
           thymeleafContext.setVariable("user", updatedUser);
-          thymeleafContext.setVariable("users", users);
+          thymeleafContext.setVariable("updateSuccess", true);
 
           // Convert Thymeleaf context to Map
           Map<String, Object> thymeleafContextMap = new HashMap<>();
           thymeleafContextMap.put("user", thymeleafContext.getVariable("user"));
-          thymeleafContextMap.put("users", thymeleafContext.getVariable("users"));
 
           // Log the template path for debugging
-          String templatePath = "template/updateUser.html";
+          String templatePath = "templates/editUser.html";
 
           // Render the Thymeleaf template
           templateEngine.render(thymeleafContextMap, templatePath, res -> {
-            if (res.succeeded()) {
+           if (res.succeeded()) {
               String result = String.valueOf(res.result());
               if (result != null && !routingContext.response().ended()) {
-                routingContext.response().putHeader("Content-Type", "text/html").end(result);
+               routingContext.response().putHeader("Content-Type", "text/html").end(result);
               } else {
                 routingContext.fail(500);
               }
-            } else {
-              routingContext.fail(500, res.cause());
+              // Log the update success here
+         //     logger.info("Updated user successfully");
+            } else {routingContext.fail(500, res.cause());
             }
-          });
+         });
 
           logger.info("Retrieved users successfully after update");
         } else {
@@ -315,14 +310,101 @@ public class UserService {
 
 
 
+  public void deleteUser(RoutingContext routingContext) {
+    try {
+      // Retrieve user ID from the request, assuming you have appropriate form fields
+      String idParam = routingContext.request().getParam("id");
+      Long id = null;
 
+      if (idParam != null && !idParam.isEmpty()) {
+        try {
+          id = Long.parseLong(idParam);
+        } catch (NumberFormatException e) {
+          // Handle the exception, e.g., log it or return an error response
+          routingContext.fail(400); // Bad Request
+          return;
+        }
+      } else {
+        // Handle the case where user ID is not provided
+        routingContext.fail(400); // Bad Request
+        return;
+      }
+
+      // Create a User object with the ID
+      User userToDelete = new User();
+      userToDelete.setId(id);
+
+      // Use the DatabaseService instance to delete the user
+      databaseService.deleteUser(userToDelete, deleteResult -> {
+        if (deleteResult.succeeded()) {
+          // User successfully deleted
+
+          // Set a flag indicating the deletion success in the routing context
+          routingContext.put("deleteSuccess", true);
+
+          // Retrieve and render users after the deletion
+          retrieveAndRenderUsers(routingContext);
+        } else {
+          // Failed to delete user
+
+          // Log the error
+          logger.error("Failed to delete user", deleteResult.cause());
+
+          // Redirect to an error page or show an error message
+          routingContext.response().setStatusCode(500).end("Failed to delete user");
+        }
+      });
+    } catch (Exception e) {
+      // Handle any unexpected exceptions
+      routingContext.fail(500, e);
+      logger.error("Error during deleteUser", e);
+    }
+  }
+
+
+  // Helper method to retrieve and render users
+  private void retrieveAndRenderUsers(RoutingContext routingContext) {
+    databaseService.getUsers(usersResult -> {
+      if (usersResult.succeeded()) {
+        // Add the user list to the Thymeleaf context
+        List<User> users = usersResult.result();
+        Context thymeleafContext = new Context();
+        thymeleafContext.setVariable("users", users);
+
+        // Convert Thymeleaf context to Map
+        Map<String, Object> thymeleafContextMap = new HashMap<>();
+        thymeleafContextMap.put("users", thymeleafContext.getVariable("users"));
+
+        // Log the template path for debugging
+        String templatePath = "templates/users.html";
+
+        // Render the Thymeleaf template
+        templateEngine.render(thymeleafContextMap, templatePath, res -> {
+          if (res.succeeded()) {
+            String result = String.valueOf(res.result());
+            if (result != null && !routingContext.response().ended()) {
+              routingContext.response().putHeader("Content-Type", "text/html").end(result);
+            } else {
+              routingContext.fail(500);
+            }
+          } else {
+            routingContext.fail(500, res.cause());
+          }
+        });
+
+        logger.info("Retrieved users successfully after deletion");
+      } else {
+        logger.error("Failed to retrieve users after deletion", usersResult.cause());
+        // Respond with an error status code
+        routingContext.fail(500);
+      }
+    });
+  }
 
 
 
 
 }
-
-
 
 
 

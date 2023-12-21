@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit User</title>
+  <!-- Add your CSS styles or include external stylesheets here -->
+</head>
+
+<body>
+<div class="container">
+  <h1>Edit User</h1>
+
+  <!-- Display success message if user is updated -->
+  <div th:if="${updateSuccess}">
+    <div class="alert alert-success" role="alert">
+      User updated successfully!
+    </div>
+
+  </div>
+
+  <!-- User edit form -->
+  <form action="/editUser" method="post">
+
+        <input type="hidden" name="id" th:value="${user.id}">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" th:value="${user.username}" required />
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" th:value="${user.password}" required />
+
+
+
+    <!-- Submit button -->
+    <button type="submit">Update User</button>
+  </form>
+
+  <!-- Link to go back to the user list page -->
+  <a th:href="@{/users}">Back to User List</a>
+</div>
+
+<!-- Add your JavaScript scripts here if needed -->
+
+</body>
+
+</html>

@@ -2,6 +2,7 @@ package com.vas.maz.vertx_starter.user;
 
 
 public class User {
+
   private Long id; // Assuming Long for flexibility, adjust as needed
   private String username;
   private String password;

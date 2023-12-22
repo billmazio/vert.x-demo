@@ -1,6 +1,7 @@
-package com.vas.maz.vertx_starter.user;
+package com.vas.maz.vertx_starter.server;
 
-import com.vas.maz.vertx_starter.user.service.UserService;
+import com.vas.maz.vertx_starter.router.UserRouter;
+import com.vas.maz.vertx_starter.service.UserService;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Router;

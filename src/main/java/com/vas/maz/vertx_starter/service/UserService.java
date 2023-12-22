@@ -1,6 +1,6 @@
-package com.vas.maz.vertx_starter.user.service;
+package com.vas.maz.vertx_starter.service;
 
-import com.vas.maz.vertx_starter.user.User;
+import com.vas.maz.vertx_starter.model.User;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -306,9 +306,8 @@ public class UserService {
       routingContext.fail(500, e);
       logger.error("Error during updateUser", e);
     }
+
   }
-
-
 
   public void deleteUser(RoutingContext routingContext) {
     try {
@@ -400,7 +399,6 @@ public class UserService {
       }
     });
   }
-
 
 
 

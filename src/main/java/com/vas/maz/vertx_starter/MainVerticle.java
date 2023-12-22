@@ -1,7 +1,7 @@
 package com.vas.maz.vertx_starter;
 
-import com.vas.maz.vertx_starter.user.Server;
-import com.vas.maz.vertx_starter.user.service.UserService;
+import com.vas.maz.vertx_starter.server.Server;
+import com.vas.maz.vertx_starter.service.UserService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 

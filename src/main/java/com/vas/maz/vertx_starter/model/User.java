@@ -1,4 +1,4 @@
-package com.vas.maz.vertx_starter.user;
+package com.vas.maz.vertx_starter.model;
 
 
 public class User {

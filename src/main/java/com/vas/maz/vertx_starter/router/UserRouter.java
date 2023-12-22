@@ -7,7 +7,7 @@ import io.vertx.ext.web.handler.StaticHandler;
 
 public class UserRouter {
 
-
+private UserService userService;
   private Router router;
 
 
@@ -21,6 +21,22 @@ public class UserRouter {
     router.get("/users").handler(userService::getUsers);
     router.post("/editUser").handler(userService::updateUser);
     router.post("/deleteUser").handler(userService::deleteUser);
+    router.post("/editUser/:id").handler(routingContext -> {
+      userService.updateUser(routingContext); // Handle user update
+      // Redirect to the users page after successful update
+      routingContext.response()
+        .setStatusCode(303)
+        .putHeader("Location", "/users?timestamp=" + System.currentTimeMillis())
+        .putHeader("Cache-Control", "no-store, no-cache, must-revalidate")
+        .putHeader("Pragma", "no-cache")
+        .putHeader("Expires", "0")
+        .end();
+
+
+    });
+
+
+
 
 
 

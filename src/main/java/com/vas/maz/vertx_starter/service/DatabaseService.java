@@ -119,7 +119,6 @@ public class DatabaseService {
       resultHandler.handle(Future.failedFuture("Invalid user or user id"));
       return;
     }
-
     // Check if the new username is already taken
     String checkUserQuery = "SELECT id FROM users WHERE username = ? AND id <> ?";
     JsonArray checkParams = new JsonArray().add(user.getUsername()).add(user.getId());
@@ -152,13 +151,16 @@ public class DatabaseService {
   }
 
 
+
+
+
+
   public void deleteUser(User user, Handler<AsyncResult<Void>> resultHandler) {
     // Check if the user or user id is null
     if (user == null || user.getId() == null) {
       resultHandler.handle(Future.failedFuture("Invalid user or user id"));
       return;
     }
-
     // Perform the user deletion directly
     String deleteUserQuery = "DELETE FROM users WHERE id = ?";
     JsonArray deleteParams = new JsonArray().add(user.getId());
@@ -173,9 +175,6 @@ public class DatabaseService {
       }
     });
   }
-
-
-  // Update user asynchronously
 
 
 }

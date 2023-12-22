@@ -25,7 +25,7 @@
 
 
 
-    <form id="userForm" action="/editUser" method="post" >
+  <form method="post" th:action="@{/editUser/{id}(id=${user.id})}" class="update-form">
     <input type="hidden" name="id" th:value="${user.id}">
     <label for="username">Username:</label>
     <input type="text" id="username" name="username" th:value="${user.username}" required />
@@ -37,7 +37,7 @@
     </form>
 
   <!-- Link to go back to the user list page -->
-  <a th:href="@{/users}">Back to User List</a>
+<!--  <a th:href="@{/users}">Back to User List</a>-->
 
 
 
@@ -48,6 +48,10 @@
 
 
 </div>
+
+
+
+
 </body>
 
 </html>

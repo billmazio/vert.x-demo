@@ -261,12 +261,11 @@ public class UserService {
       // Retrieve and render users after the update (similar to getUsers logic)
       databaseService.getUsers(usersResult -> {
         if (usersResult.succeeded()) {
-        //  List<User> users = usersResult.result();
 
           // Add the updated user to the Thymeleaf context
           Context thymeleafContext = new Context();
           thymeleafContext.setVariable("user", updatedUser);
-          thymeleafContext.setVariable("updateSuccess", true);
+
 
           // Convert Thymeleaf context to Map
           Map<String, Object> thymeleafContextMap = new HashMap<>();
@@ -276,6 +275,9 @@ public class UserService {
           String templatePath = "templates/editUser.html";
 
           // Render the Thymeleaf template
+          // Disable Thymeleaf caching
+
+
           templateEngine.render(thymeleafContextMap, templatePath, res -> {
            if (res.succeeded()) {
               String result = String.valueOf(res.result());
@@ -285,7 +287,7 @@ public class UserService {
                 routingContext.fail(500);
               }
               // Log the update success here
-         //     logger.info("Updated user successfully");
+              logger.info("Updated user successfully");
             } else {routingContext.fail(500, res.cause());
             }
          });

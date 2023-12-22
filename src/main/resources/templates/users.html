@@ -30,7 +30,7 @@
         </form>
 
         <!-- Update User Form -->
-        <form method="post" action="/editUser" class="update-form">
+        <form th:method="post" th:action="@{/editUser}" class="update-form">
           <input type="hidden" name="id" th:value="${user.id}">
           <button type="submit" class="btn btn-primary">Update</button>
         </form>

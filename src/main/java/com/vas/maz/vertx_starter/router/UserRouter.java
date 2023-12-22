@@ -22,20 +22,14 @@ private UserService userService;
     router.post("/editUser").handler(userService::updateUser);
     router.post("/deleteUser").handler(userService::deleteUser);
     router.post("/editUser/:id").handler(routingContext -> {
-      userService.updateUser(routingContext); // Handle user update
-      // Redirect to the users page after successful update
-      routingContext.response()
-        .setStatusCode(303)
-        .putHeader("Location", "/users?timestamp=" + System.currentTimeMillis())
-        .putHeader("Cache-Control", "no-store, no-cache, must-revalidate")
-        .putHeader("Pragma", "no-cache")
-        .putHeader("Expires", "0")
-        .end();
+        userService.updateUser(routingContext); // Handle user update
 
-
-    });
-
-
+        // Redirect to the users page after successful update using JavaScript
+        String redirectScript = "<script>window.location.href = '/users';</script>";
+        routingContext.response()
+          .putHeader("Content-Type", "text/html")
+          .end(redirectScript);
+      });
 
 
 

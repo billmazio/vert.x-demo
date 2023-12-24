@@ -53,7 +53,26 @@ public class DatabaseService {
       }
     });
   }
+  public void getUserPassword(String username, String providedPassword, Handler<AsyncResult<Boolean>> resultHandler) {
+    // Query to retrieve the stored password for the given username
+    String query = "SELECT password FROM users WHERE username = ?";
 
+    jdbcClient.querySingleWithParams(query, new JsonArray().add(username), queryResult -> {
+      if (queryResult.succeeded()) {
+        // Retrieve the stored password from the result
+        String storedPassword = queryResult.result().getString(0);
+
+        // Check if the provided password matches the stored password
+        boolean authenticationSuccess = storedPassword != null && storedPassword.equals(providedPassword);
+
+        // Notify the result handler about the authentication outcome
+        resultHandler.handle(Future.succeededFuture(authenticationSuccess));
+      } else {
+        // Handle the case where the query fails
+        resultHandler.handle(Future.failedFuture(queryResult.cause()));
+      }
+    });
+  }
 
   public void doesUsernameExist(String username, Handler<AsyncResult<Boolean>> resultHandler) {
     jdbcClient.getConnection(res -> {

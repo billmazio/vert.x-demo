@@ -1,5 +1,6 @@
 package com.vas.maz.vertx_starter.router;
 
+import com.vas.maz.vertx_starter.service.DatabaseService;
 import com.vas.maz.vertx_starter.service.UserService;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
@@ -7,10 +8,8 @@ import io.vertx.ext.web.handler.StaticHandler;
 
 public class UserRouter {
 
-private UserService userService;
+  private  DatabaseService databaseService;
   private Router router;
-
-
 
   public UserRouter(Vertx vertx, UserService userService) {
     this.router = Router.router(vertx);
@@ -30,6 +29,8 @@ private UserService userService;
           .putHeader("Content-Type", "text/html")
           .end(redirectScript);
       });
+
+
 
 
 

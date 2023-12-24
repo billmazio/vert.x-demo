@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../static/css/style.css">
   <script src="../static/js/index.js"></script>
+  <script src="../static/js/redirect.js"></script>
   <title>Login</title>
   <style>
     /* Initially hide the register form */
@@ -26,7 +27,6 @@
 
     <button type="button" onclick="performLogin()">Login</button>
 
-
     <!-- Placeholder for the response -->
     <div id="response"></div>
   </form>
@@ -45,26 +45,11 @@
     <button type="button" onclick="performRegister()">Register</button>
   </form>
 
+  <!-- Display registration response message -->
   <p id="registerResponse"></p>
+
 </div>
 
-<script>
-  function toggleForms() {
-    // Toggle the visibility of the login and register forms
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const registerLink = document.getElementById('registerLink');
 
-    if (loginForm.style.display === 'none') {
-      loginForm.style.display = 'block';
-      registerForm.style.display = 'none';
-      registerLink.innerHTML = "Don't have an account? <a href='#' onclick='toggleForms()'>Register</a>";
-    } else {
-      loginForm.style.display = 'none';
-      registerForm.style.display = 'block';
-      registerLink.innerHTML = 'Already have an account? <a href="#" onclick="toggleForms()">Login</a>';
-    }
-  }
-</script>
 </body>
 </html>

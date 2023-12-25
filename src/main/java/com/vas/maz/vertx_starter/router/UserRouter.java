@@ -9,11 +9,14 @@ import io.vertx.ext.web.handler.StaticHandler;
 public class UserRouter {
 
 
-  private Router router;
+  private final Router router;
 
   public UserRouter(Vertx vertx, UserService userService) {
     this.router = Router.router(vertx);
 
+    // Use basic authentication handler
+//    AuthHandler basicAuthHandler = BasicAuthHandler.create(authProvider);
+//    router.route("/private/*").handler(basicAuthHandler);
 
     router.post("/register").handler(userService::registerUser);
     router.post("/login").handler(userService::login);
@@ -21,14 +24,14 @@ public class UserRouter {
     router.post("/editUser").handler(userService::updateUser);
     router.post("/deleteUser").handler(userService::deleteUser);
     router.route("/editUser/:id").handler(routingContext -> {
-    userService.updateUser(routingContext); // Handle user update
+      userService.updateUser(routingContext); // Handle user update
       JsonObject responseJson = new JsonObject().put("updateMessage", "User updated successfully!");
-       routingContext.response()
-      .putHeader("Content-Type", "text/html")
-      .end(String.valueOf(responseJson));
+      routingContext.response()
+        .putHeader("Content-Type", "text/html")
+        .end(String.valueOf(responseJson));
 
 
-  });
+    });
 
 
 
@@ -46,5 +49,4 @@ public class UserRouter {
 
 
 }
-
 

@@ -86,7 +86,7 @@ public class DatabaseService {
             int count = resultSet.getResults().get(0).getInteger(0);
             resultHandler.handle(Future.succeededFuture(count > 0));
           } else {
-           logger.error("Error checking username existence", ar.cause());
+            logger.error("Error checking username existence", ar.cause());
             resultHandler.handle(Future.failedFuture(ar.cause()));
           }
           connection.close();
@@ -197,7 +197,6 @@ public class DatabaseService {
 
 
 }
-
 
 
 

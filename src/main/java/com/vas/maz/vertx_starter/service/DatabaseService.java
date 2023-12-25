@@ -16,6 +16,7 @@ import java.util.List;
 
 import static io.vertx.sqlclient.impl.SocketConnectionBase.logger;
 
+
 public class DatabaseService {
 
   private static JDBCClient jdbcClient;
@@ -197,7 +198,6 @@ public class DatabaseService {
 
 
 }
-
 
 
 

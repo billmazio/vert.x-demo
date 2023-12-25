@@ -180,7 +180,7 @@ public class UserService {
 
 
 
-//  public void updateUser(RoutingContext routingContext) {
+  //  public void updateUser(RoutingContext routingContext) {
 //    try {
 //      // Retrieve user information from the request, assuming you have appropriate form fields
 //      String idParam = routingContext.request().getParam("id");
@@ -275,9 +275,9 @@ public class UserService {
 //    }
 //
 //  }
-public Future<Void> updateUser(RoutingContext routingContext) {
-  Promise<Void> promise = Promise.promise();
-      try {
+  public Future<Void> updateUser(RoutingContext routingContext) {
+    Promise<Void> promise = Promise.promise();
+    try {
       // Retrieve user information from the request, assuming you have appropriate form fields
       String idParam = routingContext.request().getParam("id");
       Long id = null;
@@ -291,47 +291,47 @@ public Future<Void> updateUser(RoutingContext routingContext) {
           return null;
         }
       }
-    String username = routingContext.request().getParam("username");
-    String newPassword = routingContext.request().getParam("password");
+      String username = routingContext.request().getParam("username");
+      String newPassword = routingContext.request().getParam("password");
 
-    // Create a User object with the updated information
-        User updatedUser = new User(id, username, newPassword);
+      // Create a User object with the updated information
+      User updatedUser = new User(id, username, newPassword);
 
-        // Use the DatabaseService instance to update the user
-        databaseService.updateUser(updatedUser, updateResult -> {
-          if (updateResult.succeeded()) {
-            // User successfully updated
+      // Use the DatabaseService instance to update the user
+      databaseService.updateUser(updatedUser, updateResult -> {
+        if (updateResult.succeeded()) {
+          // User successfully updated
 
-            routingContext.put("updateSuccess", true);
-            logger.info("User successfully updated. updateSuccess set to true.");
+          routingContext.put("updateSuccess", true);
+          logger.info("User successfully updated. updateSuccess set to true.");
 
 
-            // Log the update success only if rendering is successful
-            renderThymeleafTemplate(routingContext, updatedUser);
+          // Log the update success only if rendering is successful
+          renderThymeleafTemplate(routingContext, updatedUser);
 
-            promise.complete(); // Complete the promise when the operation is successful
-          } else {
-            // Failed to update user
-            handleUpdateFailure(routingContext, updateResult.cause());
+          promise.complete(); // Complete the promise when the operation is successful
+        } else {
+          // Failed to update user
+          handleUpdateFailure(routingContext, updateResult.cause());
 
-            promise.fail(updateResult.cause()); // Fail the promise with the cause of the failure
-          }
-        });
+          promise.fail(updateResult.cause()); // Fail the promise with the cause of the failure
+        }
+      });
 
-      } catch (NumberFormatException e) {
-        // Handle the case where userId couldn't be parsed to Long
-        routingContext.fail(400, e);
-        logger.error("Invalid userId format", e);
-        promise.fail(e); // Fail the promise with the exception
-      } catch (Exception e) {
-        // Handle any unexpected exceptions
-        routingContext.fail(500, e);
-        logger.error("Error during updateUser", e);
-        promise.fail(e); // Fail the promise with the exception
-      }
+    } catch (NumberFormatException e) {
+      // Handle the case where userId couldn't be parsed to Long
+      routingContext.fail(400, e);
+      logger.error("Invalid userId format", e);
+      promise.fail(e); // Fail the promise with the exception
+    } catch (Exception e) {
+      // Handle any unexpected exceptions
+      routingContext.fail(500, e);
+      logger.error("Error during updateUser", e);
+      promise.fail(e); // Fail the promise with the exception
+    }
 
-  return promise.future();
-}
+    return promise.future();
+  }
 
   // Helper method to render Thymeleaf template
   private void renderThymeleafTemplate(RoutingContext routingContext, User user) {
@@ -470,7 +470,6 @@ public Future<Void> updateUser(RoutingContext routingContext) {
 
 
 }
-
 
 
 

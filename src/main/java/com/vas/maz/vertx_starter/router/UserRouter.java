@@ -14,9 +14,6 @@ public class UserRouter {
   public UserRouter(Vertx vertx, UserService userService) {
     this.router = Router.router(vertx);
 
-    // Use basic authentication handler
-//    AuthHandler basicAuthHandler = BasicAuthHandler.create(authProvider);
-//    router.route("/private/*").handler(basicAuthHandler);
 
     router.post("/register").handler(userService::registerUser);
     router.post("/login").handler(userService::login);
@@ -49,4 +46,3 @@ public class UserRouter {
 
 
 }
-

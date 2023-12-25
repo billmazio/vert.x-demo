@@ -44,23 +44,15 @@ dependencies {
   implementation ("com.fasterxml.jackson.core:jackson-databind:2.13.4.1")
   implementation("io.vertx:vertx-core")
   implementation("io.vertx:vertx-web")
-  implementation ("io.vertx:vertx-core:3.9.10") // Use the appropriate version
-  implementation ("io.vertx:vertx-web:3.9.10")  // Add other Vert.x modules as needed
   implementation("io.vertx:vertx-auth-common")
   implementation("io.vertx:vertx-auth-jwt")
   implementation("io.vertx:vertx-jdbc-client")
   implementation("io.vertx:vertx-junit5")
-
-
-
-
   implementation("org.slf4j:slf4j-api:1.7.30")
   implementation ("io.vertx:vertx-core:4.2.0")
+  implementation ("io.vertx:vertx-web:4.2.0")
   implementation("org.thymeleaf:thymeleaf:$thymeleafVersion")
   implementation("io.vertx:vertx-web-templ-thymeleaf:$vertxVersion")
-
-  // Add other dependencies as needed...
-
   testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
 }
 

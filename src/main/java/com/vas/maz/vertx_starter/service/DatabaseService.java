@@ -10,6 +10,7 @@ import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,6 @@ import static io.vertx.sqlclient.impl.SocketConnectionBase.logger;
 public class DatabaseService {
 
   private static JDBCClient jdbcClient;
-
 
   public DatabaseService(JDBCClient jdbcClient) {
     this.jdbcClient = jdbcClient;
@@ -57,10 +57,10 @@ public class DatabaseService {
     // Query to retrieve the stored password for the given username
     String query = "SELECT password FROM users WHERE username = ?";
 
-    jdbcClient.querySingleWithParams(query, new JsonArray().add(username), queryResult -> {
-      if (queryResult.succeeded()) {
+    jdbcClient.querySingleWithParams(query, new JsonArray().add(username), ar -> {
+      if (ar.succeeded()) {
         // Retrieve the stored password from the result
-        String storedPassword = queryResult.result().getString(0);
+        String storedPassword = ar.result().getString(0);
 
         // Check if the provided password matches the stored password
         boolean authenticationSuccess = storedPassword != null && storedPassword.equals(providedPassword);
@@ -69,7 +69,7 @@ public class DatabaseService {
         resultHandler.handle(Future.succeededFuture(authenticationSuccess));
       } else {
         // Handle the case where the query fails
-        resultHandler.handle(Future.failedFuture(queryResult.cause()));
+        resultHandler.handle(Future.failedFuture(ar.cause()));
       }
     });
   }
@@ -86,7 +86,7 @@ public class DatabaseService {
             int count = resultSet.getResults().get(0).getInteger(0);
             resultHandler.handle(Future.succeededFuture(count > 0));
           } else {
-            logger.error("Error checking username existence", ar.cause());
+           logger.error("Error checking username existence", ar.cause());
             resultHandler.handle(Future.failedFuture(ar.cause()));
           }
           connection.close();

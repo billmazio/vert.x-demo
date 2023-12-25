@@ -14,41 +14,54 @@
 <div class="container">
   <h1>Edit User</h1>
 
-  <!-- Display success message if user is updated -->
-  <div th:if="${updateSuccess}">
-    <div class="alert alert-success" role="alert">
-      User updated successfully!
-    </div>
-  </div>
+  <!-- Add a div to display the update message -->
+  <div id="updateMessage" class="alert alert-success" role="alert"></div>
 
-
-
-
-
-  <form method="post" th:action="@{/editUser/{id}}" class="update-form">
+  <form method="post" id="updateForm" th:action="@{/editUser/{id}}" class="update-form">
     <input type="hidden" name="id" th:value="${user.id}">
     <label for="username">Username:</label>
     <input type="text" id="username" name="username" th:value="${user.username}" required />
     <label for="password">Password:</label>
     <input type="password" id="password" name="password" th:value="${user.password}" required />
-      <button type="submit" class="btn btn-primary">Update</button>
-    </form>
+    <button type="button" onclick="submitForm()" class="btn btn-primary">Update</button>
+  </form>
 
   <!-- Link to go back to the user list page -->
   <a th:href="@{/users}">Back to User List</a>
-
-
-
 </div>
+<script th:inline="javascript">
+  function submitForm() {
+    let form = document.getElementById('updateForm');
+    let updateMessageDiv = document.getElementById('updateMessage');
 
+    // Check if the form is valid
+    if (form.checkValidity()) {
+      // Perform AJAX request using Fetch API
+      fetch(form.action, {
+        method: form.method,
+        body: new FormData(form)
+      })
+        .then(response => response.json())
+        .then(data => {
+          // Show the update message if present
+          if (data.updateMessage) {
+            updateMessageDiv.innerText = data.updateMessage;
 
-
-
-
-</div>
-
-
-
+            // Delay the redirection by 2 seconds (adjust as needed)
+            setTimeout(() => {
+              // Handle the redirection manually here
+              // You can redirect to the users page or any other URL
+              window.location.href = '/users';
+            }, 1500);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    } else {
+      // If the form is not valid, you can display an error message or take appropriate action
+      console.error('Form is not valid');
+    }
+  }
+</script>
 
 </body>
 

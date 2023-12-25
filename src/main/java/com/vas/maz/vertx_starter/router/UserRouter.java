@@ -1,14 +1,14 @@
 package com.vas.maz.vertx_starter.router;
 
-import com.vas.maz.vertx_starter.service.DatabaseService;
 import com.vas.maz.vertx_starter.service.UserService;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.StaticHandler;
 
 public class UserRouter {
 
-  private  DatabaseService databaseService;
+
   private Router router;
 
   public UserRouter(Vertx vertx, UserService userService) {
@@ -20,20 +20,15 @@ public class UserRouter {
     router.get("/users").handler(userService::getUsers);
     router.post("/editUser").handler(userService::updateUser);
     router.post("/deleteUser").handler(userService::deleteUser);
-    router.post("/editUser/:id").handler(routingContext -> {
-        userService.updateUser(routingContext); // Handle user update
-
-        // Redirect to the users page after successful update using JavaScript
-        String redirectScript = "<script>window.location.href = '/users';</script>";
-        routingContext.response()
-          .putHeader("Content-Type", "text/html")
-          .end(redirectScript);
-      });
+    router.route("/editUser/:id").handler(routingContext -> {
+    userService.updateUser(routingContext); // Handle user update
+      JsonObject responseJson = new JsonObject().put("updateMessage", "User updated successfully!");
+       routingContext.response()
+      .putHeader("Content-Type", "text/html")
+      .end(String.valueOf(responseJson));
 
 
-
-
-
+  });
 
 
 

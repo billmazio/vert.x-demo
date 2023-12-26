@@ -18,9 +18,13 @@ function toggleForms() {
   }
 }
 
+
+
+
 function performRegister() {
   const username = document.getElementById('username1').value;
   const password = document.getElementById('password1').value;
+  const registerResponse = document.getElementById('registerResponse'); // New line
 
   if (username.trim() === '' || password.trim() === '') {
     alert('Please enter both username and password.');
@@ -42,16 +46,26 @@ function performRegister() {
     body: JSON.stringify(payload)
   })
     .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      // if (!response.ok) {
+      //   throw new Error(`HTTP error! Status: ${response.status}`);
+      // }
       return response.text();
     })
     .then(data => {
       console.log('Register response:', data);
       // Handle non-JSON response
       if (data.includes('User registered successfully')) {
-        window.location.href = '/';
+        //   // Delay the redirection by 2 seconds (adjust as needed)
+           setTimeout(() => {
+        //     // Handle the redirection manually here
+        //     // You can redirect to the users page or any other URL
+             window.location.href = '/';
+           }, 1500);
+
+        registerResponse.innerText = 'Registration successful! You can now log in.';
+        // Optionally, clear the registration form fields
+        document.getElementById('username1').value = '';
+        document.getElementById('password1').value = '';
       } else {
         // Handle other cases (e.g., display an error message)
         alert(`Registration failed. ${data}`);
@@ -61,7 +75,6 @@ function performRegister() {
       console.error('Error:', error);
     });
 }
-
 
 
 function performLogin() {

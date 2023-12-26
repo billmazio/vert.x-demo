@@ -14,9 +14,11 @@ public class Server {
   private final Vertx vertx;
   private final UserService userService;
 
+
   public Server(Vertx vertx, UserService userService) {
     this.vertx = vertx;
     this.userService = userService;
+
   }
 
   public void start() {

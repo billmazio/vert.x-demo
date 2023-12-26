@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../static/css/style.css">
   <script src="../static/js/index.js"></script>
-  <script src="../static/js/redirect.js"></script>
   <title>Login</title>
   <style>
     /* Initially hide the register form */
@@ -21,12 +20,9 @@
   <form id="loginForm" action="/login" method="POST">
     <label for="username">Username:</label>
     <input type="text" id="username" placeholder="Enter your username">
-
     <label for="password">Password:</label>
     <input type="password" id="password" placeholder="Enter your password">
-
     <button type="button" onclick="performLogin()">Login</button>
-
     <!-- Placeholder for the response -->
     <div id="response"></div>
   </form>
@@ -36,20 +32,15 @@
 
   <!-- Include the register form directly -->
   <form id="registerForm" action="/register" method="POST">
-    <label for="username">Username:</label>
+    <label for="username1">Username:</label>
     <input type="text" id="username1" placeholder="Enter your username">
-
-    <label for="password">Password:</label>
+    <label for="password1">Password:</label>
     <input type="password" id="password1" placeholder="Enter your password">
-
     <button type="button" onclick="performRegister()">Register</button>
   </form>
 
   <!-- Display registration response message -->
   <p id="registerResponse"></p>
 
+
 </div>
-
-
-</body>
-</html>

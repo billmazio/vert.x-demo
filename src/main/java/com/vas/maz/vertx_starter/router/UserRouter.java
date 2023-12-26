@@ -9,13 +9,14 @@ import io.vertx.ext.web.handler.StaticHandler;
 public class UserRouter {
 
 
+
   private final Router router;
 
   public UserRouter(Vertx vertx, UserService userService) {
     this.router = Router.router(vertx);
 
 
-    router.post("/register").handler(userService::registerUser);
+     router.post("/register").handler(userService::registerUser);
     router.post("/login").handler(userService::login);
     router.get("/users").handler(userService::getUsers);
     router.post("/editUser").handler(userService::updateUser);
@@ -29,6 +30,7 @@ public class UserRouter {
 
 
     });
+
 
 
 

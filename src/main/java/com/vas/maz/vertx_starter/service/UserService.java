@@ -24,17 +24,21 @@ public class UserService {
   private DatabaseService databaseService;
 
   private final ThymeleafTemplateEngine templateEngine;
-
-
+  private static final String errorMessage = "Username already exists";
 
 
   public UserService(Vertx vertx) {
     // Create an instance of DatabaseService using vertx
     this.databaseService = new DatabaseService(JDBCClient.createShared(vertx, new JsonObject()
+
       .put("url", "jdbc:mysql://localhost:3306/vertex")
       .put("driver_class", "com.mysql.cj.jdbc.Driver")
       .put("user", "root")
       .put("password", "ww321278?")
+      .put("max_pool_size", 30) // Adjust these values based on your requirements
+      .put("initial_pool_size", 5)
+      .put("min_pool_size", 3)
+      .put("max_idle_time", 60000)
     ));
 
     this.templateEngine = ThymeleafTemplateEngine.create(vertx);
@@ -101,7 +105,7 @@ public class UserService {
               if (saveUserResult.succeeded()) {
                 logger.info("User saved successfully");
                 // Respond with a success status code
-                routingContext.response().setStatusCode(201).end("User registered successfully");
+               routingContext.response().setStatusCode(201).end("User registered successfully");
                 logger.info("Registration successful");
 
                 // Redirect to the login page after successful registration
@@ -114,7 +118,8 @@ public class UserService {
             });
           } else {
             // Respond with a message indicating that the username already exists
-            routingContext.response().setStatusCode(409).end("Username already exists");
+           routingContext.response().setStatusCode(409).end(errorMessage);
+
             logger.info("Registration failed - Username already exists");
           }
         } else {
@@ -129,6 +134,8 @@ public class UserService {
       logger.error("Error during user registration", e);
     }
   }
+
+
 
   public void getUsers(RoutingContext routingContext) {
     try {
@@ -177,163 +184,54 @@ public class UserService {
       logger.error("Error during getUsers", e);
     }
   }
-
-
-
-  //  public void updateUser(RoutingContext routingContext) {
-//    try {
-//      // Retrieve user information from the request, assuming you have appropriate form fields
-//      String idParam = routingContext.request().getParam("id");
-//      Long id = null;
-//
-//      if (idParam != null && !idParam.isEmpty()) {
-//        try {
-//          id = Long.parseLong(idParam);
-//        } catch (NumberFormatException e) {
-//          // Handle the exception, e.g., log it or return an error response
-//          routingContext.fail(400); // Bad Request
-//          return;
-//        }
-//      }
-//      String username = routingContext.request().getParam("username");
-//      String newPassword = routingContext.request().getParam("password");
-//
-//      // Create a User object with the updated information
-//      User updatedUser = new User(id, username, newPassword);
-//
-//      // Use the DatabaseService instance to update the user
-//      databaseService.updateUser(updatedUser, ar -> {
-//        if (ar.succeeded()) {
-//          // User successfully updated
-//
-//          // Set a flag indicating the update success in the routing context
-//          routingContext.put("updateSuccess", true);
-//
-//          // Redirect to the user list page
-//          //  routingContext.response().setStatusCode(303).putHeader("Location", "/users").end();
-//        } else {
-//          // Failed to update user
-//
-//          // Log the error
-//          logger.error("Failed to update user", ar.cause());
-//
-//          // Redirect to an error page or show an error message
-//          routingContext.response().setStatusCode(500).end("Failed to update user");
-//        }
-//      });
-//
-//      // Retrieve and render users after the update (similar to getUsers logic)
-//      databaseService.getUsers(usersResult -> {
-//        if (usersResult.succeeded()) {
-//
-//          // Add the updated user to the Thymeleaf context
-//          Context thymeleafContext = new Context();
-//          thymeleafContext.setVariable("user", updatedUser);
-//
-//
-//          // Convert Thymeleaf context to Map
-//          Map<String, Object> thymeleafContextMap = new HashMap<>();
-//          thymeleafContextMap.put("user", thymeleafContext.getVariable("user"));
-//
-//          // Log the template path for debugging
-//          String templatePath = "templates/editUser.html";
-//
-//          // Render the Thymeleaf template
-//          // Disable Thymeleaf caching
-//
-//
-//          templateEngine.render(thymeleafContextMap, templatePath, res -> {
-//            if (res.succeeded()) {
-//              String result = String.valueOf(res.result());
-//              if (result != null && !routingContext.response().ended()) {
-//                routingContext.response().putHeader("Content-Type", "text/html").end(result);
-//
-//              } else {
-//                routingContext.fail(500);
-//              }
-//              // Log the update success here
-//
-//            } else {routingContext.fail(500, res.cause());
-//            }
-//          });
-//
-//          logger.info("goes to update-form");
-//        } else {
-//          logger.error("Failed to retrieve users after update", usersResult.cause());
-//          // Respond with an error status code
-//          routingContext.fail(500);
-//        }
-//      });
-//    } catch (NumberFormatException e) {
-//      // Handle the case where userId couldn't be parsed to Long
-//      routingContext.fail(400, e);
-//      logger.error("Invalid userId format", e);
-//    } catch (Exception e) {
-//      // Handle any unexpected exceptions
-//      routingContext.fail(500, e);
-//      logger.error("Error during updateUser", e);
-//    }
-//
-//  }
   public Future<Void> updateUser(RoutingContext routingContext) {
     Promise<Void> promise = Promise.promise();
-    try {
-      // Retrieve user information from the request, assuming you have appropriate form fields
-      String idParam = routingContext.request().getParam("id");
-      Long id = null;
 
-      if (idParam != null && !idParam.isEmpty()) {
-        try {
-          id = Long.parseLong(idParam);
-        } catch (NumberFormatException e) {
-          // Handle the exception, e.g., log it or return an error response
-          routingContext.fail(400); // Bad Request
-          return null;
-        }
-      }
+    try {
+      Long id = parseIdParam(routingContext);
+
       String username = routingContext.request().getParam("username");
       String newPassword = routingContext.request().getParam("password");
 
-      // Create a User object with the updated information
       User updatedUser = new User(id, username, newPassword);
 
-      // Use the DatabaseService instance to update the user
       databaseService.updateUser(updatedUser, updateResult -> {
         if (updateResult.succeeded()) {
-          // User successfully updated
-
           routingContext.put("updateSuccess", true);
-          logger.info("User successfully updated. updateSuccess set to true.");
-
-
-          // Log the update success only if rendering is successful
+          logger.info("User updated successfully");
           renderThymeleafTemplate(routingContext, updatedUser);
-
-          promise.complete(); // Complete the promise when the operation is successful
+          promise.complete();
         } else {
-          // Failed to update user
           handleUpdateFailure(routingContext, updateResult.cause());
-
-          promise.fail(updateResult.cause()); // Fail the promise with the cause of the failure
+          promise.fail(updateResult.cause());
         }
       });
 
-    } catch (NumberFormatException e) {
-      // Handle the case where userId couldn't be parsed to Long
-      routingContext.fail(400, e);
-      logger.error("Invalid userId format", e);
-      promise.fail(e); // Fail the promise with the exception
     } catch (Exception e) {
-      // Handle any unexpected exceptions
       routingContext.fail(500, e);
       logger.error("Error during updateUser", e);
-      promise.fail(e); // Fail the promise with the exception
+      promise.fail(e);
     }
 
     return promise.future();
   }
 
-  // Helper method to render Thymeleaf template
+  private Long parseIdParam(RoutingContext routingContext) {
+    String idParam = routingContext.request().getParam("id");
+
+    if (idParam != null && !idParam.isEmpty()) {
+      try {
+        return Long.parseLong(idParam);
+      } catch (NumberFormatException e) {
+        routingContext.fail(400);
+        throw new RuntimeException("Invalid userId format", e);
+      }
+    }
+
+    return null;
+  }
+
+ // Helper method to render Thymeleaf template
   private void renderThymeleafTemplate(RoutingContext routingContext, User user) {
     // Add the updated user to the Thymeleaf context
     Context thymeleafContext = new Context();
@@ -354,7 +252,7 @@ public class UserService {
           routingContext.response().putHeader("Content-Type", "text/html").end(result);
 
           // Log the update success now that rendering is successful
-          logger.info("User updated successfully, goes to update-form");
+          logger.info("User successfully scheduled for update. Redirecting to editUser page.");
         } else {
           routingContext.fail(500);
         }
@@ -373,8 +271,6 @@ public class UserService {
     // Respond with an error status code and message
     routingContext.response().setStatusCode(500).end("Failed to update user");
   }
-
-
 
   public void deleteUser(RoutingContext routingContext) {
     try {

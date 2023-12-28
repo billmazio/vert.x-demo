@@ -2,12 +2,10 @@ package com.vas.maz.vertx_starter.router;
 
 import com.vas.maz.vertx_starter.service.UserService;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.StaticHandler;
 
 public class UserRouter {
-
 
 
   private final Router router;
@@ -16,21 +14,12 @@ public class UserRouter {
     this.router = Router.router(vertx);
 
 
-     router.post("/register").handler(userService::registerUser);
-    router.post("/login").handler(userService::login);
-    router.get("/users").handler(userService::getUsers);
-    router.post("/editUser").handler(userService::updateUser);
-    router.post("/deleteUser").handler(userService::deleteUser);
-    router.route("/editUser/:id").handler(routingContext -> {
-      userService.updateUser(routingContext); // Handle user update
-      JsonObject responseJson = new JsonObject().put("updateMessage", "User updated successfully!");
-      routingContext.response()
-        .putHeader("Content-Type", "text/html")
-        .end(String.valueOf(responseJson));
-
-
-    });
-
+      router.post("/register").handler(userService::registerUser);
+      router.post("/login").handler(userService::login);
+      router.get("/users").handler(userService::getUsers);
+      router.post("/editUser").handler(userService::updateUser);
+      router.post("/editUser/:id").handler(userService::updateUser);
+      router.post("/deleteUser").handler(userService::deleteUser);
 
 
 
@@ -40,6 +29,9 @@ public class UserRouter {
 
 
   }
+
+
+
 
 
   public Router getRouter() {

@@ -1,9 +1,7 @@
 package com.vas.maz.vertx_starter.service;
 
 import com.vas.maz.vertx_starter.model.User;
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
@@ -184,6 +182,7 @@ public class UserService {
       logger.error("Error during getUsers", e);
     }
   }
+
   public Future<Void> updateUser(RoutingContext routingContext) {
     Promise<Void> promise = Promise.promise();
 
@@ -193,21 +192,52 @@ public class UserService {
       String username = routingContext.request().getParam("username");
       String newPassword = routingContext.request().getParam("password");
 
-      User updatedUser = new User(id, username, newPassword);
+      // Check if the updated username already exists
+      databaseService.doesUsernameExist(username, usernameExistenceResult -> {
+        if (usernameExistenceResult.succeeded()) {
+          boolean usernameExists = usernameExistenceResult.result();
+          if (!usernameExists) {
+            // Render the Thymeleaf template before proceeding with the update
+            renderThymeleafTemplate(routingContext, new User(id, username, newPassword));
 
-      databaseService.updateUser(updatedUser, updateResult -> {
-        if (updateResult.succeeded()) {
-          routingContext.put("updateSuccess", true);
-          logger.info("User updated successfully");
-          renderThymeleafTemplate(routingContext, updatedUser);
-          promise.complete();
+            // Username doesn't exist, proceed with the update
+            User updatedUser = new User(id, username, newPassword);
+
+            databaseService.updateUser(updatedUser, updateResult -> {
+              if (updateResult.succeeded()) {
+                routingContext.put("updateSuccess", true);
+                logger.info("User updated successfully");
+
+                // Reroute to "/users" after a successful update
+
+
+                promise.complete();
+              //  routingContext.reroute("/users");
+              } else {
+                routingContext.response().setStatusCode(500).end("Failed to update user");
+                handleUpdateFailure(routingContext, updateResult.cause());
+                promise.fail(updateResult.cause());
+
+              }
+            });
+          } else {
+            // Respond with a message indicating that the username already exists
+            routingContext.response().setStatusCode(409).end("Username already exists");
+
+            logger.info("Update failed - Username already exists");
+            promise.fail("Username already exists");
+          }
         } else {
-          handleUpdateFailure(routingContext, updateResult.cause());
-          promise.fail(updateResult.cause());
+          // Handle the result of the doesUsernameExist query failure
+          routingContext.response().setStatusCode(500).end("Failed to check username existence");
+          routingContext.fail(500, usernameExistenceResult.cause());
+          logger.error("Error checking username existence", usernameExistenceResult.cause());
+          promise.fail(usernameExistenceResult.cause());
         }
       });
-
     } catch (Exception e) {
+    //  routingContext.response().setStatusCode(500).end("Error during updateUser");
+      routingContext.response().ended();
       routingContext.fail(500, e);
       logger.error("Error during updateUser", e);
       promise.fail(e);
@@ -216,22 +246,7 @@ public class UserService {
     return promise.future();
   }
 
-  private Long parseIdParam(RoutingContext routingContext) {
-    String idParam = routingContext.request().getParam("id");
-
-    if (idParam != null && !idParam.isEmpty()) {
-      try {
-        return Long.parseLong(idParam);
-      } catch (NumberFormatException e) {
-        routingContext.fail(400);
-        throw new RuntimeException("Invalid userId format", e);
-      }
-    }
-
-    return null;
-  }
-
- // Helper method to render Thymeleaf template
+  // Helper method to render Thymeleaf template
   private void renderThymeleafTemplate(RoutingContext routingContext, User user) {
     // Add the updated user to the Thymeleaf context
     Context thymeleafContext = new Context();
@@ -263,14 +278,31 @@ public class UserService {
     });
   }
 
+  private Long parseIdParam(RoutingContext routingContext) {
+    String idParam = routingContext.request().getParam("id");
+
+    if (idParam != null && !idParam.isEmpty()) {
+      try {
+        return Long.parseLong(idParam);
+      } catch (NumberFormatException e) {
+        routingContext.fail(400);
+        throw new RuntimeException("Invalid userId format", e);
+      }
+    }
+
+    return null;
+  }
+
   // Helper method to handle update failures
   private void handleUpdateFailure(RoutingContext routingContext, Throwable cause) {
-    // Log the error
     logger.error("Failed to update user", cause);
 
     // Respond with an error status code and message
     routingContext.response().setStatusCode(500).end("Failed to update user");
   }
+
+
+
 
   public void deleteUser(RoutingContext routingContext) {
     try {

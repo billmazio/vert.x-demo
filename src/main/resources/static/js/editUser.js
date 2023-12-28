@@ -1,6 +1,9 @@
 function submitForm() {
   let form = document.getElementById('updateForm');
-  let updateMessageDiv = document.getElementById('updateMessage');
+  let updateMessage = document.getElementById('updateMessage');
+
+  // Hide the update message initially
+  updateMessage.style.display = 'none';
 
   // Check if the form is valid
   if (form.checkValidity()) {
@@ -9,23 +12,31 @@ function submitForm() {
       method: form.method,
       body: new FormData(form)
     })
-      .then(response => response.json())
-      .then(data => {
-        // Show the update message if present
-        if (data.updateMessage) {
-          updateMessageDiv.innerText = data.updateMessage;
+      .then(response => {
+        if (response.ok) {
+          // Show and update the success message
+          updateMessage.innerHTML = 'User updated successfully!';
+          updateMessage.className = 'alert alert-success';
+          updateMessage.style.display = 'block';
 
-          // Delay the redirection by 2 seconds (adjust as needed)
-           setTimeout(() => {
-          // Handle the redirection manually here
-          // You can redirect to the users page or any other URL
-          window.location.href = '/users';
-            }, 1500);
+          // Redirect to the users page after a delay
+          setTimeout(() => {
+            window.location.href = '/users';
+          }, 1500);
+        } else {
+          throw new Error('Failed to update user');
         }
       })
-      .catch(error => console.error('Error:', error));
+      .catch(error => {
+        // Show and update the error message
+        updateMessage.innerHTML = 'Error: ' + error.message;
+        updateMessage.className = 'alert alert-danger';
+        updateMessage.style.display = 'block';
+      });
   } else {
-    // If the form is not valid, you can display an error message or take appropriate action
-    console.error('Form is not valid');
+    // Show and update the form validation error message
+    updateMessage.innerHTML = 'Error: Form is not valid';
+    updateMessage.className = 'alert alert-danger';
+    updateMessage.style.display = 'block';
   }
 }

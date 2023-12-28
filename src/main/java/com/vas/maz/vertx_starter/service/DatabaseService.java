@@ -133,34 +133,40 @@ public class DatabaseService {
   }
 
 
+
   public void updateUser(User user, Handler<AsyncResult<Void>> resultHandler) {
     // Check if the user or user id is null
     if (user == null || user.getId() == null) {
       resultHandler.handle(Future.failedFuture("Invalid user or user id"));
       return;
     }
-
     // Check if the new username is already taken
-    doesUsernameExist(user.getUsername(), usernameExistenceResult -> {
-      if (usernameExistenceResult.succeeded() && usernameExistenceResult.result()) {
-        // New username is already taken, handle accordingly
-        resultHandler.handle(Future.failedFuture("New username already exists"));
+    String checkUserQuery = "SELECT id FROM users WHERE username = ? AND id <> ?";
+    JsonArray checkParams = new JsonArray().add(user.getUsername()).add(user.getId());
+
+    jdbcClient.querySingleWithParams(checkUserQuery, checkParams, checkUser -> {
+      if (checkUser.failed()) {
+        // Handle the query failure
+        resultHandler.handle(Future.failedFuture(checkUser.cause()));
       } else {
-        // Continue with the user update process
+        if (checkUser.result() != null) {
+          // New username is already taken, handle accordingly
+          resultHandler.handle(Future.failedFuture("New username already exists"));
+        } else {
+          // Update the user information in the database
+          String updateUserQuery = "UPDATE users SET username = IFNULL(?, username), password = IFNULL(?, password) WHERE id = ?";
+          JsonArray params = new JsonArray().add(user.getUsername()).add(user.getPassword()).add(user.getId());
 
-        // Update the user information in the database
-        String updateUserQuery = "UPDATE users SET username = IFNULL(?, username), password = IFNULL(?, password) WHERE id = ?";
-        JsonArray params = new JsonArray().add(user.getUsername()).add(user.getPassword()).add(user.getId());
-
-        jdbcClient.updateWithParams(updateUserQuery, params, updateResult -> {
-          if (updateResult.failed()) {
-            // Handle the update failure
-            resultHandler.handle(Future.failedFuture(updateResult.cause()));
-          } else {
-            // User successfully updated
-            resultHandler.handle(Future.succeededFuture());
-          }
-        });
+          jdbcClient.updateWithParams(updateUserQuery, params, updateResult -> {
+            if (updateResult.failed()) {
+              // Handle the update failure
+              resultHandler.handle(Future.failedFuture(updateResult.cause()));
+            } else {
+              // User successfully updated
+              resultHandler.handle(Future.succeededFuture());
+            }
+          });
+        }
       }
     });
   }

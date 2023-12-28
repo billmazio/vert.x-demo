@@ -27,7 +27,9 @@ function performRegister() {
   const registerResponse = document.getElementById('registerResponse'); // New line
 
   if (username.trim() === '' || password.trim() === '') {
-    alert('Please enter both username and password.');
+    registerResponse.innerHTML = 'Please enter both username and password.';
+    registerResponse.className = 'alert alert-danger';
+    registerResponse.style.display = 'block';
     return;
   }
 
@@ -78,25 +80,26 @@ function performRegister() {
 
 
 function performLogin() {
-  // Get values from the input fields
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
+  const loginResponse = document.getElementById('loginResponse');
 
-  // Check if username or password is empty
+  loginResponse.style.display = 'none';
+
   if (username.trim() === '' || password.trim() === '') {
-    alert('Please enter both username and password.');
+    loginResponse.innerHTML = 'Please enter both username and password.';
+    loginResponse.className = 'alert alert-danger';
+    loginResponse.style.display = 'block';
     return;
   }
 
-  console.log('Performing login with username:', username);
+ // console.log('Performing login with username:', username);
 
-  // Create JSON payload
   const payload = {
     username: username,
     password: password
   };
 
-  // Make a POST request to /api/login
   fetch('/login', {
     method: 'POST',
     headers: {
@@ -105,40 +108,38 @@ function performLogin() {
     body: JSON.stringify(payload)
   })
     .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      // Check if the response is JSON
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        return response.json();
+      console.log('Response received:', response);
+      if (response.ok) {
+        return response.text;
       } else {
-        // Handle non-JSON response (e.g., redirect or display an error)
-        console.log('Non-JSON response:', response);
-        // You can decide how to handle this based on your server behavior
-        // For now, let's assume a successful login and redirect
-        window.location.href = '/users';
+        // If the response is not OK, still try to read the text to show the message
+        return response.text().then(text => {
+          loginResponse.innerHTML = text || 'Login failed. Please check your credentials.';
+          loginResponse.className = 'alert alert-danger';
+          loginResponse.style.display = 'block';
+          throw new Error('Login failed');
+        });
       }
     })
     .then(data => {
-      // Handle the JSON response (if any)
       console.log('Login response:', data);
-      if (data.success) {
-        // Check if the response contains a 'redirect' property
-        if (data.redirect) {
-          // Redirect to the path specified in the 'redirect' property
-          window.location.href = data.redirect;
-        } else {
-          // If no specific redirect path, fallback to '/users'
-          window.location.href = '/users';
-        }
-      } else {
-        alert('Login failed. Please check your credentials.');
+      // Handle the success case
+      loginResponse.innerHTML = 'Login successful! Redirecting...';
+      loginResponse.className = 'alert alert-success';
+      loginResponse.style.display = 'block';
 
-      }
+      setTimeout(() => {
+        window.location.href = data.redirect || '/users';
+      }, 1500);
     })
     .catch(error => {
-      // Handle errors
       console.error('Error:', error);
+      // If this catch block is reached without setting the loginResponse,
+      // it means there was a network error or some unexpected issue
+      if (loginResponse.innerHTML === '') {
+        loginResponse.innerHTML = 'Error: ' + error;
+        loginResponse.className = 'alert alert-danger';
+        loginResponse.style.display = 'block';
+      }
     });
 }

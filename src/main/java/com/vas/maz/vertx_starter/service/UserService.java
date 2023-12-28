@@ -1,8 +1,9 @@
 package com.vas.maz.vertx_starter.service;
 
 import com.vas.maz.vertx_starter.model.User;
-import io.vertx.core.*;
-import io.vertx.core.json.Json;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.web.RoutingContext;
@@ -65,7 +66,8 @@ public class UserService {
           logger.info("Login successful");
         } else {
           // Authentication failed
-          routingContext.response().setStatusCode(401).end(Json.encode(new JsonObject().put("success", false).put("message", "Authentication failed")));
+         // routingContext.response().setStatusCode(401).end(Json.encode(new JsonObject().put("success", false).put("message", "Authentication failed")));
+          routingContext.response().setStatusCode(401).end("Login failed - Wrong password");
           logger.info("Login failed - Authentication failed");
         }
       });

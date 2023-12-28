@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../static/css/style.css">
-  <script src="../static/js/index.js"></script>
+
   <title>Login</title>
   <style>
     /* Initially hide the register form */
@@ -24,9 +24,9 @@
     <input type="password" id="password" placeholder="Enter your password">
     <button type="button" onclick="performLogin()">Login</button>
     <!-- Placeholder for the response -->
-    <div id="response"></div>
-  </form>
 
+  </form>
+  <div id="loginResponse"></div>
   <!-- Link to toggle between login and register forms -->
   <p id="registerLink">Don't have an account? <a href="#" onclick="toggleForms()">Register</a></p>
 
@@ -44,3 +44,6 @@
 
 
 </div>
+<script src="../static/js/index.js"></script>
+</body>
+</html>

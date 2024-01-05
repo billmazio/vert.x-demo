@@ -60,7 +60,7 @@ public class UserService {
     JWTAuthOptions config = new JWTAuthOptions()
       .addPubSecKey(new PubSecKeyOptions()
         .setAlgorithm("HS256")
-        .setBuffer("Bas3263")); // Use the same secret key as in UserRouter
+        .setBuffer("")); // Use the same secret key as in UserRouter
 
     return JWTAuth.create(vertx, config);
   }
@@ -267,7 +267,7 @@ public void login(RoutingContext routingContext) {
                 promise.complete();
               //  routingContext.reroute("/users");
               } else {
-                routingContext.response().setStatusCode(500).end("Failed to update user");
+              //  routingContext.response().setStatusCode(500).end("Failed to update user");
                 handleUpdateFailure(routingContext, updateResult.cause());
                 promise.fail(updateResult.cause());
 

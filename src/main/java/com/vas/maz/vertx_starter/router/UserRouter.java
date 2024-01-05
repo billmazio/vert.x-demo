@@ -3,7 +3,6 @@ package com.vas.maz.vertx_starter.router;
 import com.vas.maz.vertx_starter.service.UserService;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 
 public class UserRouter {
@@ -29,7 +28,7 @@ public class UserRouter {
     router.post("/login").handler(userService::login);
 
     // Protect routes under /users/* using JWT authentication
-    router.route("/users/*").handler(JWTAuthHandler.create(userService.getJwtAuth()));
+    //router.route("/users/*").handler(JWTAuthHandler.create(userService.getJwtAuth()));
 
     // Secured routes
     router.get("/users").handler(userService::getUsers);

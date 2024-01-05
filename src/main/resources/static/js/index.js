@@ -22,6 +22,7 @@ function toggleForms() {
 
 
 function performRegister() {
+
   const username = document.getElementById('username1').value;
   const password = document.getElementById('password1').value;
   const registerResponse = document.getElementById('registerResponse'); // New line
@@ -36,6 +37,7 @@ function performRegister() {
   console.log('Performing registration with username:', username);
 
   const payload = {
+
     username: username,
     password: password
   };
@@ -48,9 +50,9 @@ function performRegister() {
     body: JSON.stringify(payload)
   })
     .then(response => {
-      // if (!response.ok) {
-      //   throw new Error(`HTTP error! Status: ${response.status}`);
-      // }
+       if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+       }
       return response.text();
     })
     .then(data => {
@@ -61,7 +63,7 @@ function performRegister() {
            setTimeout(() => {
         //     // Handle the redirection manually here
         //     // You can redirect to the users page or any other URL
-             window.location.href = '/';
+             window.location.href = '/login';
            }, 1500);
 
         registerResponse.innerText = 'Registration successful! You can now log in.';
@@ -78,7 +80,6 @@ function performRegister() {
     });
 }
 
-
 function performLogin() {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
@@ -93,53 +94,128 @@ function performLogin() {
     return;
   }
 
- // console.log('Performing login with username:', username);
-
-  const payload = {
-    username: username,
-    password: password
-  };
+  const payload = { username, password };
 
   fetch('/login', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
+    headers: { 'Content-Type': 'application/json' }
   })
     .then(response => {
-      console.log('Response received:', response);
       if (response.ok) {
-        return response.text;
+        return response.json();
+      } else if (response.status === 401) {
+        throw new Error('Invalid username or password.');
       } else {
-        // If the response is not OK, still try to read the text to show the message
-        return response.text().then(text => {
-          loginResponse.innerHTML = text || 'Login failed. Please check your credentials.';
-          loginResponse.className = 'alert alert-danger';
-          loginResponse.style.display = 'block';
-          throw new Error('Login failed');
-        });
+        throw new Error('An unexpected error occurred. Please try again.');
       }
     })
     .then(data => {
-      console.log('Login response:', data);
-      // Handle the success case
-      loginResponse.innerHTML = 'Login successful! Redirecting...';
-      loginResponse.className = 'alert alert-success';
-      loginResponse.style.display = 'block';
-
-      setTimeout(() => {
-        window.location.href = data.redirect || '/users';
-      }, 1500);
+      if (data.jwtToken) {
+        localStorage.setItem('jwtToken', data.jwtToken); // Store the JWT token
+        loginResponse.innerHTML = 'Login successful! Redirecting...';
+        loginResponse.className = 'alert alert-success';
+        loginResponse.style.display = 'block';
+        fetchUserData(); // Fetch user data on successful login
+      } else {
+        throw new Error('Login failed or no token received.');
+      }
     })
     .catch(error => {
       console.error('Error:', error);
-      // If this catch block is reached without setting the loginResponse,
-      // it means there was a network error or some unexpected issue
-      if (loginResponse.innerHTML === '') {
-        loginResponse.innerHTML = 'Error: ' + error;
-        loginResponse.className = 'alert alert-danger';
-        loginResponse.style.display = 'block';
-      }
+      loginResponse.innerHTML = error.message;
+      loginResponse.className = 'alert alert-danger';
+      loginResponse.style.display = 'block';
     });
 }
+
+function fetchUserData() {
+  const token = localStorage.getItem('jwtToken');
+  if (!token) {
+    console.error('JWT token is not available');
+    return;
+  }
+
+  fetch('/users', {
+    method: 'GET',
+    headers: {
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        // Specific handling for unauthorized access
+        if (response.status === 401) {
+          throw new Error('Unauthorized access. Please login again.');
+        }
+        throw new Error('Failed to fetch user data. Status: ' + response.status);
+      }
+    })
+    .then(data => {
+      console.log('User data:', data);
+      // Redirect to the users' page or update the UI with user data
+      //window.location.href = '/users.html'; // Redirect to a specific page
+      window.location.href = data.redirect || '/users';
+    })
+    .catch(error => {
+     // console.error('Error fetching user data:', error);
+      // Clear JWT token in case of an authorization error
+      if (error.message.includes('Unauthorized')) {
+        localStorage.removeItem('jwtToken');
+      }
+      // Update UI to reflect the error
+      // Example: Show error message on UI
+    });
+}
+// function performLogin() {
+//   const username = document.getElementById('username').value;
+//   const password = document.getElementById('password').value;
+//   const loginResponse = document.getElementById('loginResponse');
+//
+//   loginResponse.style.display = 'none';
+//
+//   if (username.trim() === '' || password.trim() === '') {
+//     loginResponse.innerHTML = 'Please enter both username and password.';
+//     loginResponse.className = 'alert alert-danger';
+//     loginResponse.style.display = 'block';
+//     return;
+//   }
+//
+//   const payload = { username, password };
+//
+//   fetch('/login', {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify(payload)
+//   })
+//     .then(response => {
+//       if (response.ok) {
+//         return response.json();
+//       } else if (response.status === 401) {
+//         throw new Error('Invalid username or password.');
+//       } else {
+//         throw new Error('An error occurred during login. Please try again.');
+//       }
+//     })
+//     .then(data => {
+//       if (data && data.jwtToken) {
+//         localStorage.setItem('jwtToken', data.jwtToken);
+//         loginResponse.innerHTML = 'Login successful! Redirecting...';
+//         loginResponse.className = 'alert alert-success';
+//         loginResponse.style.display = 'block';
+//         window.location.href = '/users';
+//       } else {
+//         throw new Error('Login failed: No JWT token received.');
+//       }
+//     })
+//     .catch(error => {
+//       console.error('Login Error:', error);
+//       loginResponse.innerHTML = error.message;
+//       loginResponse.className = 'alert alert-danger';
+//       loginResponse.style.display = 'block';
+//     });
+//
+// }

@@ -11,8 +11,9 @@ import io.vertx.ext.web.handler.StaticHandler;
 
 public class Server {
 
-  private final Vertx vertx;
-  private final UserService userService;
+  private  Vertx vertx;
+  private  UserService userService;
+
 
 
   public Server(Vertx vertx, UserService userService) {
@@ -35,10 +36,12 @@ public class Server {
     router.route().handler(BodyHandler.create());
 
     UserRouter userRouter = new UserRouter(vertx, userService);
+
+
     router.mountSubRouter("/", userRouter.getRouter());
 
     StaticHandler staticHandler = StaticHandler.create().setCachingEnabled(false).setWebRoot("templates");
-    router.route("/").handler(staticHandler);
+    router.route("/login").handler(staticHandler);
 
     vertx.createHttpServer()
       .requestHandler(router)

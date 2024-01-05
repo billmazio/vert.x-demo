@@ -13,7 +13,7 @@ import java.sql.DriverManager;
 @ExtendWith(VertxExtension.class)
 public class TestMainAppVerticle {
   public static void main(String[] args) {
-    String url = "jdbc:mysql://localhost:3306/vertex";
+    String url = "jdbc:mysql://localhost:3306/vertx";
     String user = "root";
     String password = "ww321278?";
 

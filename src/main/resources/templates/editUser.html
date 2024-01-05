@@ -18,14 +18,14 @@
   <!-- Add a div to display the update message, initially hidden -->
   <div id="updateMessage" class="alert" role="alert" style="display: none;"></div>
 
-
-
   <form method="post" id="updateForm" th:action="@{/editUser/{id}}" class="update-form">
     <input type="hidden" id="id" name="id" th:value="${user.id}">
+
     <label for="username">Username:</label>
     <input type="text" id="username" name="username" th:value="${user.username}" required />
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" th:value="${user.password}" required />
+
+    <!-- Removed the password input field -->
+
     <button type="button" onclick="submitForm()">Update</button>
   </form>
 

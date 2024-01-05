@@ -5,6 +5,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.JWTOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
@@ -20,62 +24,106 @@ import static io.vertx.sqlclient.impl.SocketConnectionBase.logger;
 public class UserService {
 
 
-  private DatabaseService databaseService;
+  private final DatabaseService databaseService;
+  private final JWTAuth jwtAuth;
 
   private final ThymeleafTemplateEngine templateEngine;
   private static final String errorMessage = "Username already exists";
 
 
   public UserService(Vertx vertx) {
-    // Create an instance of DatabaseService using vertx
-    this.databaseService = new DatabaseService(JDBCClient.createShared(vertx, new JsonObject()
-
-      .put("url", "jdbc:mysql://localhost:3306/vertex")
+    // Create a JDBCClient configuration
+    JsonObject config = new JsonObject()
+      .put("url", "jdbc:mysql://localhost:3306/vertx")
       .put("driver_class", "com.mysql.cj.jdbc.Driver")
-      .put("user", "root")
-      .put("password", "ww321278?")
-      .put("max_pool_size", 30) // Adjust these values based on your requirements
+      .put("user", "")
+      .put("password", "")
+      .put("max_pool_size", 30)
       .put("initial_pool_size", 5)
       .put("min_pool_size", 3)
-      .put("max_idle_time", 60000)
-    ));
+      .put("max_idle_time", 60000);
+
+    // Create an instance of JDBCClient
+    JDBCClient jdbcClient = JDBCClient.createShared(vertx, config);
+
+    // Create an instance of DatabaseService using vertx and jdbcClient
+    this.databaseService = new DatabaseService(jdbcClient);
 
     this.templateEngine = ThymeleafTemplateEngine.create(vertx);
+    this.jwtAuth = jwtAuth(vertx);
   }
 
-  public void login(RoutingContext routingContext) {
-    try {
-      JsonObject requestBody = routingContext.getBodyAsJson();
-      if (requestBody == null || requestBody.isEmpty()) {
-        routingContext.fail(400); // Bad Request
-        return;
-      }
 
-      String username = requestBody.getString("username");
-      String password = requestBody.getString("password");
 
-      // Use the DatabaseService instance to authenticate the user
-      databaseService.getUserPassword(username, password, authResult -> {
-        if (authResult.succeeded() && authResult.result()) {
-          // Authentication succeeded
-          routingContext.response()
-            .putHeader("Content-Type", "text/html")
-            .putHeader("Location", "/")
-            .setStatusCode(303) // See Other
-            .end();
-          logger.info("Login successful");
-        } else {
-          // Authentication failed
-         // routingContext.response().setStatusCode(401).end(Json.encode(new JsonObject().put("success", false).put("message", "Authentication failed")));
-          routingContext.response().setStatusCode(401).end("Login failed - Wrong password");
-          logger.info("Login failed - Authentication failed");
-        }
-      });
-    } catch (Exception e) {
-      routingContext.fail(500, e);
-      logger.error("Error during login", e);
+
+  public JWTAuth jwtAuth(Vertx vertx) {
+    JWTAuthOptions config = new JWTAuthOptions()
+      .addPubSecKey(new PubSecKeyOptions()
+        .setAlgorithm("HS256")
+        .setBuffer("Bas3263")); // Use the same secret key as in UserRouter
+
+    return JWTAuth.create(vertx, config);
+  }
+
+//  public void login(RoutingContext routingContext) {
+//    JsonObject requestBody = routingContext.getBodyAsJson();
+//    if (requestBody == null || requestBody.isEmpty() ||
+//      !requestBody.containsKey("username") || !requestBody.containsKey("password")) {
+//      routingContext.response().setStatusCode(400).end("Invalid request");
+//      return;
+//    }
+//
+//    String username = requestBody.getString("username");
+//    String password = requestBody.getString("password");
+//
+//    databaseService.getUserPassword(username, password, authResult -> {
+//      if (authResult.succeeded() && authResult.result()) {
+//        // Generate JWT token
+//        String token = jwtAuth.generateToken(
+//          new JsonObject().put("username", username),
+//          new JWTOptions().setExpiresInSeconds(3600)
+//        );
+//        // Here, you might want to return an HTML response
+//        routingContext.response()
+//          .putHeader("Content-Type", "application/json")
+//          .end(new JsonObject().put("jwtToken", token).encode());
+//      } else {
+//        // Authentication failed
+//        routingContext.response().setStatusCode(401).end("Invalid username or password");
+//      }
+//    });
+//  }
+public void login(RoutingContext routingContext) {
+  JsonObject requestBody = routingContext.getBodyAsJson();
+  if (requestBody == null || requestBody.isEmpty() ||
+    !requestBody.containsKey("username") || !requestBody.containsKey("password")) {
+    routingContext.response().setStatusCode(400).end("Invalid request");
+    return;
+  }
+
+  String username = requestBody.getString("username");
+  String password = requestBody.getString("password");
+
+  // Authenticate the user by checking the username and password in your database
+  databaseService.getUserPassword(username, password, authResult -> {
+    if (authResult.succeeded() && authResult.result()) {
+      // Authentication succeeded, generate a JWT token
+      String token = jwtAuth.generateToken(
+        new JsonObject().put("username", username),
+        new JWTOptions().setExpiresInSeconds(3600) // Set token expiration time
+      );
+
+      // Respond with the JWT token in the JSON response
+      JsonObject jsonResponse = new JsonObject().put("jwtToken", token);
+      routingContext.response()
+        .putHeader("Content-Type", "application/json")
+        .end(jsonResponse.encode());
+    } else {
+      // Authentication failed
+    routingContext.response().setStatusCode(401).end("Invalid username or password");
     }
-  }
+  });
+}
 
   public void registerUser(RoutingContext routingContext) {
     try {
@@ -137,6 +185,7 @@ public class UserService {
 
 
 
+
   public void getUsers(RoutingContext routingContext) {
     try {
       // Use the DatabaseService instance to retrieve users
@@ -184,6 +233,8 @@ public class UserService {
       logger.error("Error during getUsers", e);
     }
   }
+
+
 
   public Future<Void> updateUser(RoutingContext routingContext) {
     Promise<Void> promise = Promise.promise();
@@ -398,7 +449,9 @@ public class UserService {
   }
 
 
-
+  public JWTAuth getJwtAuth() {
+    return jwtAuth;
+  }
 }
 
 
